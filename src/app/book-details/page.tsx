@@ -1,14 +1,13 @@
 import { Button } from "@/components/ui/button"
-import { Card } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { BookOpen, Search, Bell, Star, ThumbsUp, ThumbsDown } from "lucide-react"
 import Link from "next/link"
 
 export default function BookDetailsPage() {
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
+    <div className="flex flex-col min-h-screen bg-slate-50 dark:bg-slate-900">
       {/* Header */}
-      <header className="sticky top-0 z-10 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm border-b border-slate-200 dark:border-slate-800">
+      <header className="bg-slate-50 dark:bg-slate-900/80 sticky top-0 z-10 backdrop-blur-sm border-b border-slate-200 dark:border-slate-800">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center gap-8">
@@ -19,16 +18,16 @@ export default function BookDetailsPage() {
               <nav className="hidden md:flex items-center gap-6">
                 <Link
                   href="/"
-                  className="text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-blue-500 transition-colors"
+                  className="text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-blue-500 dark:hover:text-blue-500 transition-colors"
                 >
                   Home
                 </Link>
-                <Link href="/explore" className="text-sm font-medium text-blue-500">
+                <Link href="/collections" className="text-sm font-medium text-blue-500 dark:text-blue-500">
                   Explore
                 </Link>
                 <Link
                   href="/profile"
-                  className="text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-blue-500 transition-colors"
+                  className="text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-blue-500 dark:hover:text-blue-500 transition-colors"
                 >
                   My Books
                 </Link>
@@ -38,30 +37,36 @@ export default function BookDetailsPage() {
               <div className="relative hidden sm:block">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
                 <input
-                  className="w-full max-w-xs pl-10 pr-4 py-2 rounded-full border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                  className="w-full max-w-xs pl-10 pr-4 py-2 rounded-full border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
                   placeholder="Search books or authors"
                   type="search"
                 />
               </div>
-              <Button variant="ghost" size="icon" className="text-slate-600 dark:text-slate-300">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="p-2 rounded-full hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors text-slate-600 dark:text-slate-300"
+              >
                 <Bell className="h-5 w-5" />
               </Button>
-              <Avatar className="h-10 w-10">
-                <AvatarImage src="/diverse-user-avatars.png" />
-                <AvatarFallback>U</AvatarFallback>
-              </Avatar>
+              <div
+                className="w-10 h-10 rounded-full bg-cover bg-center"
+                style={{
+                  backgroundImage: `url('/placeholder.svg?key=profile')`,
+                }}
+              ></div>
             </div>
           </div>
         </div>
       </header>
 
-      <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-grow">
         {/* Breadcrumb */}
         <div className="mb-6 text-sm text-slate-500 dark:text-slate-400">
-          <Link href="/" className="hover:text-blue-500">
+          <Link href="/" className="hover:text-blue-500 dark:hover:text-blue-500">
             Books
           </Link>
-          <span className="mx-2">/</span>
+          <span>/</span>
           <span className="text-slate-800 dark:text-slate-200">The Silent Observer</span>
         </div>
 
@@ -69,13 +74,12 @@ export default function BookDetailsPage() {
           {/* Book Cover */}
           <div className="lg:col-span-1">
             <div className="sticky top-24">
-              <div className="aspect-[2/3] w-full rounded-lg bg-cover bg-center shadow-lg overflow-hidden">
-                <img
-                  src="/placeholder-g47oy.png"
-                  alt="The Silent Observer book cover"
-                  className="w-full h-full object-cover"
-                />
-              </div>
+              <div
+                className="aspect-[2/3] w-full rounded-lg bg-cover bg-center shadow-lg"
+                style={{
+                  backgroundImage: `url('/placeholder.svg?key=book-cover')`,
+                }}
+              ></div>
               <div className="mt-6 text-center">
                 <h1 className="text-3xl font-bold text-slate-900 dark:text-white">The Silent Observer</h1>
                 <p className="text-lg text-slate-600 dark:text-slate-400 mt-1">by Amelia Stone</p>
@@ -87,7 +91,7 @@ export default function BookDetailsPage() {
           {/* Reviews Section */}
           <div className="lg:col-span-2">
             {/* Rating Overview */}
-            <Card className="p-6 mb-8">
+            <section className="bg-slate-50 dark:bg-slate-900/50 p-6 rounded-lg shadow-md mb-8">
               <h2 className="text-2xl font-bold mb-4 text-slate-900 dark:text-white">Rating & Reviews</h2>
               <div className="flex flex-col sm:flex-row items-center gap-6 sm:gap-8">
                 <div className="flex flex-col items-center">
@@ -119,14 +123,14 @@ export default function BookDetailsPage() {
                   ))}
                 </div>
               </div>
-            </Card>
+            </section>
 
             {/* Individual Reviews */}
             <div className="space-y-8">
               {[
                 {
                   name: "Sophia Carter",
-                  avatar: "/diverse-woman-avatar.png",
+                  avatar: "/diverse-woman-profile.png",
                   time: "2 months ago",
                   rating: 5,
                   review:
@@ -136,7 +140,7 @@ export default function BookDetailsPage() {
                 },
                 {
                   name: "Ethan Blake",
-                  avatar: "/man-avatar.png",
+                  avatar: "/diverse-man-profile.png",
                   time: "3 months ago",
                   rating: 4,
                   review:
@@ -146,7 +150,7 @@ export default function BookDetailsPage() {
                 },
                 {
                   name: "Olivia Reed",
-                  avatar: "/woman-avatar-2.png",
+                  avatar: "/woman-author-profile-picture.jpg",
                   time: "4 months ago",
                   rating: 5,
                   review:
@@ -155,10 +159,10 @@ export default function BookDetailsPage() {
                   dislikes: 1,
                 },
               ].map((review, index) => (
-                <Card key={index} className="p-6">
+                <article key={index} className="p-6 rounded-lg bg-slate-50 dark:bg-slate-900/50 shadow-md">
                   <div className="flex items-start gap-4">
-                    <Avatar className="h-12 w-12">
-                      <AvatarImage src={review.avatar || "/placeholder.svg"} />
+                    <Avatar className="w-12 h-12">
+                      <AvatarImage src={review.avatar || "/placeholder.svg"} alt={review.name} />
                       <AvatarFallback>
                         {review.name
                           .split(" ")
@@ -183,18 +187,18 @@ export default function BookDetailsPage() {
                       </div>
                       <p className="mt-3 text-slate-700 dark:text-slate-300">{review.review}</p>
                       <div className="flex items-center gap-4 mt-3 text-sm text-slate-500 dark:text-slate-400">
-                        <Button variant="ghost" size="sm" className="flex items-center gap-1.5 hover:text-blue-500">
+                        <button className="flex items-center gap-1.5 hover:text-blue-500">
                           <ThumbsUp className="w-4 h-4" />
                           {review.likes}
-                        </Button>
-                        <Button variant="ghost" size="sm" className="flex items-center gap-1.5 hover:text-blue-500">
+                        </button>
+                        <button className="flex items-center gap-1.5 hover:text-blue-500">
                           <ThumbsDown className="w-4 h-4" />
                           {review.dislikes}
-                        </Button>
+                        </button>
                       </div>
                     </div>
                   </div>
-                </Card>
+                </article>
               ))}
             </div>
           </div>

@@ -6,7 +6,6 @@ import { Input } from "@/components/ui/input"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Card, CardContent } from "@/components/ui/card"
 import { Search, Bell, BookOpen } from "lucide-react"
-
 import Link from "next/link"
 
 export default function CollectionsPage() {

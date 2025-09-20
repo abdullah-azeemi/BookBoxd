@@ -7,6 +7,8 @@ import { Checkbox } from "@/components/ui/checkBox"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Bell, BookOpen, Star } from "lucide-react"
 
+import Link from "next/link"
+
 export default function AddReviewPage() {
   const [review, setReview] = useState("")
   const [rating, setRating] = useState(3)
@@ -30,12 +32,12 @@ export default function AddReviewPage() {
               <h1 className="text-xl font-bold tracking-tight">NovelNest</h1>
             </div>
             <nav className="hidden md:flex items-center gap-6 text-sm font-medium">
-              <a
+              <Link
                 className="text-slate-600 dark:text-slate-400 hover:text-blue-500 dark:hover:text-blue-500 transition-colors"
                 href="/"
               >
                 Home
-              </a>
+              </Link>
               <a className="text-blue-500 font-semibold" href="/add-review">
                 Explore
               </a>

@@ -4,6 +4,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Search, BookOpen } from "lucide-react"
 import Link from "next/link"
+import Image from "next/image"
 
 export default function ProfilePage() {
   const bookCovers = [
@@ -23,7 +24,7 @@ export default function ProfilePage() {
           <div className="flex items-center gap-8">
             <div className="flex items-center gap-3">
               <BookOpen className="h-6 w-6 text-primary" />
-              <h2 className="text-xl font-bold">BookVerse</h2>
+              <h2 className="text-xl font-bold">BookBoxd</h2>
             </div>
             <nav className="hidden md:flex items-center gap-6">
               <Link className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors" href="#">
@@ -65,7 +66,7 @@ export default function ProfilePage() {
             <div className="flex flex-col items-center gap-1">
               <h1 className="text-3xl font-bold">Sophia Bennett</h1>
               <p className="text-muted-foreground">Avid reader and book reviewer</p>
-              <p className="text-sm text-muted-foreground">Joined in 2021</p>
+              <p className="text-sm text-muted-foreground">Joined in 2025</p>
             </div>
             <Button variant="outline" className="bg-primary/10 text-primary hover:bg-primary/20">
               Edit Profile
