@@ -1,0 +1,257 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id             String    @id @default(uuid())
+  clerkId        String    @unique
+  email          String    @unique
+  username       String    @unique
+  fullName       String?
+  bio            String?
+  avatarUrl      String?
+  location       String?
+  website        String?
+  followersCount Int       @default(0)
+  followingCount Int       @default(0)
+  booksReadCount Int       @default(0)
+  reviewsCount   Int       @default(0)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  // Relations
+  reviews        Review[]
+  readingLists   ReadingList[]
+  followers      UserFollow[] @relation("UserFollowers")
+  following      UserFollow[] @relation("UserFollowing")
+  reviewLikes    ReviewLike[]
+  reviewComments ReviewComment[]
+  notifications  Notification[]
+  sessions       ReadingSession[]
+  aiRecs         AIRecommendation[]
+  collections    Collection[]
+  userBadges     UserBadge[]
+}
+
+model Author {
+  id            String    @id @default(uuid())
+  name          String
+  bio           String?
+  photoUrl      String?
+  birthDate     DateTime?
+  nationality   String?
+  website       String?
+  followersCount Int      @default(0)
+  booksCount    Int       @default(0)
+  createdAt     DateTime  @default(now())
+
+  books         BookAuthor[]
+}
+
+model Book {
+  id             String    @id @default(uuid())
+  title          String
+  isbn           String?   @unique
+  description    String?
+  coverUrl       String?
+  publicationDate DateTime?
+  pageCount      Int?
+  language       String    @default("en")
+  averageRating  Float     @default(0.0)
+  ratingsCount   Int       @default(0)
+  reviewsCount   Int       @default(0)
+  createdAt      DateTime  @default(now())
+
+  authors        BookAuthor[]
+  genres         BookGenre[]
+  reviews        Review[]
+  readingLists   ReadingList[]
+  collectionBooks CollectionBook[]
+  sessions       ReadingSession[]
+  aiRecs         AIRecommendation[]
+}
+
+model Genre {
+  id          String      @id @default(uuid())
+  name        String      @unique
+  description String?
+  color       String?     // hex color
+
+  books       BookGenre[]
+}
+
+model BookAuthor {
+  bookId   String
+  authorId String
+
+  book     Book   @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  author   Author @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  @@id([bookId, authorId])
+}
+
+model BookGenre {
+  bookId  String
+  genreId String
+
+  book    Book  @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  genre   Genre @relation(fields: [genreId], references: [id], onDelete: Cascade)
+
+  @@id([bookId, genreId])
+}
+
+model Review {
+  id             String   @id @default(uuid())
+  userId         String
+  bookId         String
+  rating         Int
+  title          String?
+  content        String?
+  spoilerWarning Boolean  @default(false)
+  likesCount     Int      @default(0)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  book           Book     @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  likes          ReviewLike[]
+  comments       ReviewComment[]
+
+  @@unique([userId, bookId]) // one review per user/book
+}
+
+model ReviewLike {
+  userId  String
+  reviewId String
+
+  user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  review  Review @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@id([userId, reviewId])
+}
+
+model ReviewComment {
+  id        String   @id @default(uuid())
+  reviewId  String
+  userId    String
+  content   String
+  createdAt DateTime @default(now())
+
+  review    Review  @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model ReadingList {
+  id        String   @id @default(uuid())
+  userId    String
+  bookId    String
+  status    String   // want_to_read, currently_reading, read
+  progress  Int      @default(0)
+  startedAt DateTime?
+  finishedAt DateTime?
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  book      Book     @relation(fields: [bookId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, bookId])
+}
+
+model UserFollow {
+  followerId  String
+  followingId String
+  createdAt   DateTime @default(now())
+
+  follower    User @relation("UserFollowers", fields: [followerId], references: [id], onDelete: Cascade)
+  following   User @relation("UserFollowing", fields: [followingId], references: [id], onDelete: Cascade)
+
+  @@id([followerId, followingId])
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  userId    String
+  type      String
+  entityId  String?
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model ReadingSession {
+  id            String   @id @default(uuid())
+  userId        String
+  bookId        String
+  pagesRead     Int
+  durationMinutes Int
+  sessionDate   DateTime
+  createdAt     DateTime @default(now())
+
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  book          Book     @relation(fields: [bookId], references: [id], onDelete: Cascade)
+}
+
+model AIRecommendation {
+  id             String   @id @default(uuid())
+  userId         String
+  bookId         String
+  reason         String?
+  confidenceScore Float
+  createdAt      DateTime @default(now())
+
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  book           Book     @relation(fields: [bookId], references: [id], onDelete: Cascade)
+}
+
+model Collection {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  type        String   // curated, auto_generated, user_created
+  userId      String?
+  isPublic    Boolean  @default(true)
+  booksCount  Int      @default(0)
+  createdAt   DateTime @default(now())
+
+  user        User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  books       CollectionBook[]
+}
+
+model CollectionBook {
+  collectionId String
+  bookId       String
+  addedAt      DateTime @default(now())
+
+  collection   Collection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+  book         Book       @relation(fields: [bookId], references: [id], onDelete: Cascade)
+
+  @@id([collectionId, bookId])
+}
+
+model Badge {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  iconUrl     String?
+
+  users       UserBadge[]
+}
+
+model UserBadge {
+  userId  String
+  badgeId String
+  earnedAt DateTime @default(now())
+
+  user    User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  badge   Badge @relation(fields: [badgeId], references: [id], onDelete: Cascade)
+
+  @@id([userId, badgeId])
+}

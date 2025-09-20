@@ -1,52 +1,12 @@
 import { Button } from "@/components/ui/button"
-import { BookOpen, Search, PersonStanding, MessageSquare } from "lucide-react"
+import { Search, PersonStanding, MessageSquare } from "lucide-react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import Link from "next/link"
 
 export default function HomePage() {
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
-      {/* Header */}
-      <header className="sticky top-0 z-10 w-full bg-slate-50/80 dark:bg-slate-900/80 backdrop-blur-sm">
-        <div className="container mx-auto flex items-center justify-between px-4 py-3 sm:px-6 lg:px-8">
-          <Link href="/" className="flex items-center gap-2">
-            <BookOpen className="h-6 w-6 text-blue-500" />
-            <span className="text-2xl font-bold text-slate-900 dark:text-white">BookWise</span>
-          </Link>
-          <nav className="hidden items-center gap-8 md:flex">
-            <Link
-              href="/home"
-              className="text-sm font-medium text-slate-600 hover:text-blue-500 dark:text-slate-300 dark:hover:text-blue-500"
-            >
-              Home
-            </Link>
-            <Link
-              href="/collections"
-              className="text-sm font-medium text-slate-600 hover:text-blue-500 dark:text-slate-300 dark:hover:text-blue-500"
-            >
-              Explore
-            </Link>
-            <Link
-              href="/profile"
-              className="text-sm font-medium text-slate-600 hover:text-blue-500 dark:text-slate-300 dark:hover:text-blue-500"
-            >
-              My Books
-            </Link>
-          </nav>
-          <div className="flex items-center gap-2">
-            <Button
-              variant="ghost"
-              className="rounded-full px-4 py-2 text-sm font-bold text-blue-500 transition-colors hover:bg-blue-500/10 dark:hover:bg-blue-500/20"
-            >
-              Log In
-            </Button>
-            <Button className="rounded-full bg-blue-500 px-4 py-2 text-sm font-bold text-white shadow-sm transition-opacity hover:opacity-90">
-              Sign Up
-            </Button>
-          </div>
-        </div>
-      </header>
-
+      
       <main className="flex-grow">
         {/* Hero Section */}
         <section
