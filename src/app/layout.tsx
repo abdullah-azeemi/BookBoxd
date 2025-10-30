@@ -4,6 +4,7 @@ import { GeistSans } from "geist/font/sans"
 import { GeistMono } from "geist/font/mono"
 import { Analytics } from "@vercel/analytics/next"
 import { Suspense } from "react"
+import SearchBar from "@/components/ui/SearchBar"
 
 import Link from "next/link"
 import { BookOpen } from "lucide-react"
@@ -62,6 +63,7 @@ export default function RootLayout({
             </Link>
           </nav>
           <div className="flex items-center gap-4">
+            <SearchBar />
             <SignedOut>
               <div className="text-sm font-medium text-slate-600 hover:text-blue-500 dark:text-slate-300 dark:hover:text-blue-500">
               <SignInButton mode="modal" />

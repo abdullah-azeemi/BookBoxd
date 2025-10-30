@@ -1,12 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Card, CardContent } from "@/components/ui/card"
-import { Search, Bell, BookOpen } from "lucide-react"
-import Link from "next/link"
 
 export default function CollectionsPage() {
   const [searchQuery, setSearchQuery] = useState("")
@@ -50,16 +45,20 @@ export default function CollectionsPage() {
   }
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      if (searchQuery.trim()) fetchBooks(searchQuery.trim())
+    const handleSearch = (e: CustomEvent<string>) => {
+      const q = e.detail.trim()
+      setSearchQuery(q)
+      if (q) fetchBooks(q)
       else setSearchResults([])
-    }, 500)
-    return () => clearTimeout(timer)
-  }, [searchQuery])
+    }
+
+    window.addEventListener("bookSearch", handleSearch as EventListener)
+    return () => window.removeEventListener("bookSearch", handleSearch as EventListener)
+  }, [])
 
   const renderBookList = (books: any[]) => (
     <div className="flex space-x-6 overflow-x-auto pb-4 scrollbar-hide">
-      {books.map((book) => (
+      {books.slice(0, 8).map((book) => (
         <div key={book.id || book.title} className="flex-shrink-0 w-40 space-y-2">
           <img
             alt={book.title}
@@ -77,57 +76,9 @@ export default function CollectionsPage() {
 
   return (
     <div className="flex flex-col min-h-screen bg-slate-50 dark:bg-slate-900">
-      {/* Header */}
-      <header className="sticky top-0 z-10 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm border-b border-slate-200 dark:border-slate-800">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <div className="flex items-center space-x-8">
-              <div className="flex items-center space-x-2">
-                <BookOpen className="h-6 w-6 text-blue-500" />
-                <h1 className="text-xl font-bold">NovelNest</h1>
-              </div>
-              <nav className="hidden md:flex items-center space-x-6">
-                <Link className="text-sm font-medium hover:text-blue-500 transition-colors" href="/">
-                  Home
-                </Link>
-                <Link className="text-sm font-medium hover:text-blue-500 transition-colors" href="/home">
-                  Explore
-                </Link>
-                <Link className="text-sm font-medium text-blue-500" href="/collections">
-                  My Library
-                </Link>
-                <Link className="text-sm font-medium hover:text-blue-500 transition-colors" href="#">
-                  Community
-                </Link>
-              </nav>
-            </div>
-            <div className="flex items-center space-x-4">
-              <div className="relative hidden sm:block">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
-                <Input
-                  className="w-full pl-10 pr-4 py-2 rounded-full"
-                  placeholder="Search books..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
-              </div>
-              <Button variant="ghost" size="icon" className="rounded-full">
-                <Bell className="h-5 w-5" />
-              </Button>
-              <Avatar>
-                <AvatarImage src="/diverse-user-avatars.png" alt="User" />
-                <AvatarFallback>U</AvatarFallback>
-              </Avatar>
-            </div>
-          </div>
-        </div>
-      </header>
-
-      {/* Main Content */}
       <main className="flex-grow container mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <h1 className="text-3xl font-bold mb-8">My Library</h1>
 
-        {/* Static Sections */}
         <section className="mb-12">
           <h2 className="text-2xl font-bold mb-4">Read</h2>
           {renderBookList(readBooks)}
@@ -149,7 +100,7 @@ export default function CollectionsPage() {
             {loading ? (
               <p>Loading...</p>
             ) : searchResults.length > 0 ? (
-              renderBookList(searchResults.slice(0, 8)) 
+              renderBookList(searchResults)
             ) : (
               <p>No books found</p>
             )}
@@ -175,7 +126,9 @@ export default function CollectionsPage() {
               <CardContent className="p-6 flex items-center space-x-6">
                 <div className="flex-grow">
                   <h3 className="font-bold text-lg">New Releases in Your Favorite Genres</h3>
-                  <p className="text-slate-600 dark:text-slate-400 text-sm">Stay up-to-date with the latest books</p>
+                  <p className="text-slate-600 dark:text-slate-400 text-sm">
+                    Stay up-to-date with the latest books
+                  </p>
                 </div>
                 <img
                   alt="New Releases"
