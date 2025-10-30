@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -10,6 +10,8 @@ import Link from "next/link"
 
 export default function CollectionsPage() {
   const [searchQuery, setSearchQuery] = useState("")
+  const [searchResults, setSearchResults] = useState<any[]>([])
+  const [loading, setLoading] = useState(false)
 
   const readBooks = [
     { title: "The Whispering Woods", cover: "/whispering-woods-book-cover.jpg" },
@@ -32,6 +34,46 @@ export default function CollectionsPage() {
     { title: "The Vanishing Act", cover: "/vanishing-act-book-cover.jpg" },
     { title: "Tales of the Empire", cover: "/tales-empire-book-cover.jpg" },
   ]
+
+  const fetchBooks = async (query: string) => {
+    if (!query) return
+    setLoading(true)
+    try {
+      const res = await fetch(`/api/books?q=${encodeURIComponent(query)}`)
+      const data = await res.json()
+      setSearchResults(data.books || [])
+    } catch (error) {
+      console.error("Error fetching books:", error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (searchQuery.trim()) fetchBooks(searchQuery.trim())
+      else setSearchResults([])
+    }, 500)
+    return () => clearTimeout(timer)
+  }, [searchQuery])
+
+  const renderBookList = (books: any[]) => (
+    <div className="flex space-x-6 overflow-x-auto pb-4 scrollbar-hide">
+      {books.map((book) => (
+        <div key={book.id || book.title} className="flex-shrink-0 w-40 space-y-2">
+          <img
+            alt={book.title}
+            className="w-full aspect-[2/3] object-cover rounded-lg shadow-lg hover:shadow-xl transition-shadow"
+            src={book.coverUrl || book.cover || "/placeholder.svg"}
+          />
+          <h3 className="font-semibold truncate text-sm">{book.title}</h3>
+          {book.authors?.length > 0 && (
+            <p className="text-xs text-slate-500">{book.authors.join(", ")}</p>
+          )}
+        </div>
+      ))}
+    </div>
+  )
 
   return (
     <div className="flex flex-col min-h-screen bg-slate-50 dark:bg-slate-900">
@@ -85,64 +127,35 @@ export default function CollectionsPage() {
       <main className="flex-grow container mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <h1 className="text-3xl font-bold mb-8">My Library</h1>
 
-        {/* Read Section */}
+        {/* Static Sections */}
         <section className="mb-12">
           <h2 className="text-2xl font-bold mb-4">Read</h2>
-          <div className="relative">
-            <div className="flex space-x-6 overflow-x-auto pb-4 scrollbar-hide">
-              {readBooks.map((book, index) => (
-                <div key={index} className="flex-shrink-0 w-40 space-y-2">
-                  <img
-                    alt={book.title}
-                    className="w-full aspect-[2/3] object-cover rounded-lg shadow-lg hover:shadow-xl transition-shadow"
-                    src={book.cover || "/placeholder.svg"}
-                  />
-                  <h3 className="font-semibold truncate text-sm">{book.title}</h3>
-                </div>
-              ))}
-            </div>
-          </div>
+          {renderBookList(readBooks)}
         </section>
 
-        {/* Currently Reading Section */}
         <section className="mb-12">
           <h2 className="text-2xl font-bold mb-4">Currently Reading</h2>
-          <div className="relative">
-            <div className="flex space-x-6 overflow-x-auto pb-4 scrollbar-hide">
-              {currentlyReading.map((book, index) => (
-                <div key={index} className="flex-shrink-0 w-40 space-y-2">
-                  <img
-                    alt={book.title}
-                    className="w-full aspect-[2/3] object-cover rounded-lg shadow-lg hover:shadow-xl transition-shadow"
-                    src={book.cover || "/placeholder.svg"}
-                  />
-                  <h3 className="font-semibold truncate text-sm">{book.title}</h3>
-                </div>
-              ))}
-            </div>
-          </div>
+          {renderBookList(currentlyReading)}
         </section>
 
-        {/* Want to Read Section */}
         <section className="mb-12">
           <h2 className="text-2xl font-bold mb-4">Want to Read</h2>
-          <div className="relative">
-            <div className="flex space-x-6 overflow-x-auto pb-4 scrollbar-hide">
-              {wantToRead.map((book, index) => (
-                <div key={index} className="flex-shrink-0 w-40 space-y-2">
-                  <img
-                    alt={book.title}
-                    className="w-full aspect-[2/3] object-cover rounded-lg shadow-lg hover:shadow-xl transition-shadow"
-                    src={book.cover || "/placeholder.svg"}
-                  />
-                  <h3 className="font-semibold truncate text-sm">{book.title}</h3>
-                </div>
-              ))}
-            </div>
-          </div>
+          {renderBookList(wantToRead)}
         </section>
 
-        {/* Auto-generated Reading Lists */}
+        {searchQuery.trim() && (
+          <section className="mb-12">
+            <h2 className="text-2xl font-bold mb-4">Search Results</h2>
+            {loading ? (
+              <p>Loading...</p>
+            ) : searchResults.length > 0 ? (
+              renderBookList(searchResults.slice(0, 8)) 
+            ) : (
+              <p>No books found</p>
+            )}
+          </section>
+        )}
+
         <section>
           <h2 className="text-2xl font-bold mb-4">Auto-generated Reading Lists</h2>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

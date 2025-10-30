@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import prisma from "../../../../lib/prisma";
+import {prisma} from "../../../../lib/prisma";
 
 import { WebhookEvent } from "@clerk/nextjs/server";
 
