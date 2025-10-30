@@ -1,12 +1,13 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { Card, CardContent } from "@/components/ui/card"
+import Link from "next/link";
+import { useState, useEffect } from "react";
+import { Card, CardContent } from "@/components/ui/card";
 
 export default function CollectionsPage() {
-  const [searchQuery, setSearchQuery] = useState("")
-  const [searchResults, setSearchResults] = useState<any[]>([])
-  const [loading, setLoading] = useState(false)
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
 
   const readBooks = [
     { title: "The Whispering Woods", cover: "/whispering-woods-book-cover.jpg" },
@@ -14,13 +15,13 @@ export default function CollectionsPage() {
     { title: "Echoes of Tomorrow", cover: "/echoes-tomorrow-book-cover.jpg" },
     { title: "The Silent Witness", cover: "/silent-witness-book-cover.jpg" },
     { title: "Chronicles of Eldoria", cover: "/chronicles-eldoria-book-cover.jpg" },
-  ]
+  ];
 
   const currentlyReading = [
     { title: "City of Dreams", cover: "/city-dreams-book-cover.jpg" },
     { title: "Love in the Highlands", cover: "/love-highlands-book-cover.jpg" },
     { title: "The Lost Expedition", cover: "/lost-expedition-book-cover.jpg" },
-  ]
+  ];
 
   const wantToRead = [
     { title: "The Dragon's Legacy", cover: "/dragon-legacy-book-cover.jpg" },
@@ -28,51 +29,57 @@ export default function CollectionsPage() {
     { title: "Beyond the Stars", cover: "/beyond-stars-book-cover.jpg" },
     { title: "The Vanishing Act", cover: "/vanishing-act-book-cover.jpg" },
     { title: "Tales of the Empire", cover: "/tales-empire-book-cover.jpg" },
-  ]
+  ];
 
   const fetchBooks = async (query: string) => {
-    if (!query) return
-    setLoading(true)
+    if (!query) return;
+    setLoading(true);
     try {
-      const res = await fetch(`/api/books?q=${encodeURIComponent(query)}`)
-      const data = await res.json()
-      setSearchResults(data.books || [])
+      const res = await fetch(`/api/books?q=${encodeURIComponent(query)}`);
+      const data = await res.json();
+      setSearchResults(data.books || []);
     } catch (error) {
-      console.error("Error fetching books:", error)
+      console.error("Error fetching books:", error);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   useEffect(() => {
     const handleSearch = (e: CustomEvent<string>) => {
-      const q = e.detail.trim()
-      setSearchQuery(q)
-      if (q) fetchBooks(q)
-      else setSearchResults([])
-    }
+      const q = e.detail.trim();
+      setSearchQuery(q);
+      if (q) fetchBooks(q);
+      else setSearchResults([]);
+    };
 
-    window.addEventListener("bookSearch", handleSearch as EventListener)
-    return () => window.removeEventListener("bookSearch", handleSearch as EventListener)
-  }, [])
+    window.addEventListener("bookSearch", handleSearch as EventListener);
+    return () => window.removeEventListener("bookSearch", handleSearch as EventListener);
+  }, []);
 
   const renderBookList = (books: any[]) => (
     <div className="flex space-x-6 overflow-x-auto pb-4 scrollbar-hide">
       {books.slice(0, 8).map((book) => (
-        <div key={book.id || book.title} className="flex-shrink-0 w-40 space-y-2">
-          <img
-            alt={book.title}
-            className="w-full aspect-[2/3] object-cover rounded-lg shadow-lg hover:shadow-xl transition-shadow"
-            src={book.coverUrl || book.cover || "/placeholder.svg"}
-          />
-          <h3 className="font-semibold truncate text-sm">{book.title}</h3>
-          {book.authors?.length > 0 && (
-            <p className="text-xs text-slate-500">{book.authors.join(", ")}</p>
-          )}
-        </div>
+        <Link
+          key={book.id || book.title}
+          href={book.id ? `/book/${book.id}` : "#"}
+          className="flex-shrink-0 w-40 space-y-2 cursor-pointer hover:scale-105 transition-transform"
+        >
+          <div>
+            <img
+              alt={book.title}
+              src={book.coverUrl || book.cover || "/placeholder.svg"}
+              className="w-full aspect-[2/3] object-cover rounded-lg shadow-lg hover:shadow-xl transition-shadow"
+            />
+            <h3 className="font-semibold truncate text-sm mt-1">{book.title}</h3>
+            {book.authors?.length > 0 && (
+              <p className="text-xs text-slate-500">{book.authors.join(", ")}</p>
+            )}
+          </div>
+        </Link>
       ))}
     </div>
-  )
+  );
 
   return (
     <div className="flex flex-col min-h-screen bg-slate-50 dark:bg-slate-900">
@@ -118,7 +125,11 @@ export default function CollectionsPage() {
                     Based on your reading history and preferences
                   </p>
                 </div>
-                <img alt="Top Picks" className="w-32 h-20 object-cover rounded-lg" src="/top-picks-books-collection.jpg" />
+                <img
+                  alt="Top Picks"
+                  src="/top-picks-books-collection.jpg"
+                  className="w-32 h-20 object-cover rounded-lg"
+                />
               </CardContent>
             </Card>
 
@@ -132,8 +143,8 @@ export default function CollectionsPage() {
                 </div>
                 <img
                   alt="New Releases"
-                  className="w-32 h-20 object-cover rounded-lg"
                   src="/new-releases-books-collection.jpg"
+                  className="w-32 h-20 object-cover rounded-lg"
                 />
               </CardContent>
             </Card>
@@ -148,8 +159,8 @@ export default function CollectionsPage() {
                 </div>
                 <img
                   alt="Hidden Gems"
-                  className="w-32 h-20 object-cover rounded-lg"
                   src="/placeholder.svg?height=80&width=128"
+                  className="w-32 h-20 object-cover rounded-lg"
                 />
               </CardContent>
             </Card>
@@ -157,5 +168,5 @@ export default function CollectionsPage() {
         </section>
       </main>
     </div>
-  )
+  );
 }

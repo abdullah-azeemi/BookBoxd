@@ -1,36 +1,52 @@
-import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { BookOpen, Search, Bell, Star, ThumbsUp, ThumbsDown } from "lucide-react"
+import { Star, ThumbsUp, ThumbsDown } from "lucide-react"
 import Link from "next/link"
 
-export default function BookDetailsPage() {
+interface Book {
+  id: string
+  volumeInfo: {
+    title: string
+    authors?: string[]
+    categories?: string[]
+    description?: string
+    imageLinks?: { thumbnail?: string }
+  }
+}
+
+export default async function BookDetailsPage(props: { params: Promise<{ id: string }> }) {
+  const { id } = await props.params // ✅ Await params as required by Next.js 15+
+  const res = await fetch(`https://www.googleapis.com/books/v1/volumes/${id}`)
+  const book: Book = await res.json()
+
+  const title = book?.volumeInfo?.title || "Unknown Title"
+  const author = book?.volumeInfo?.authors?.join(", ") || "Unknown Author"
+  const categories = book?.volumeInfo?.categories?.slice(0, 5)?.join(", ") || "Uncategorized"
+  const cover = book?.volumeInfo?.imageLinks?.thumbnail || "/placeholder.svg"
+
   return (
     <div className="flex flex-col min-h-screen bg-slate-50 dark:bg-slate-900">
-
       <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-grow">
         {/* Breadcrumb */}
         <div className="mb-6 text-sm text-slate-500 dark:text-slate-400">
-          <Link href="/" className="hover:text-blue-500 dark:hover:text-blue-500">
+          <Link href="/collections" className="hover:text-blue-500 dark:hover:text-blue-500">
             Books
           </Link>
-          <span>/</span>
-          <span className="text-slate-800 dark:text-slate-200">The Silent Observer</span>
+          <span className="mx-1">/</span>
+          <span className="text-slate-800 dark:text-slate-200">{title}</span>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-12">
-          {/* Book Cover */}
+          {/* Book Cover and Info */}
           <div className="lg:col-span-1">
             <div className="sticky top-24">
               <div
                 className="aspect-[2/3] w-full rounded-lg bg-cover bg-center shadow-lg"
-                style={{
-                  backgroundImage: `url('/placeholder.svg?key=book-cover')`,
-                }}
+                style={{ backgroundImage: `url('${cover}')` }}
               ></div>
               <div className="mt-6 text-center">
-                <h1 className="text-3xl font-bold text-slate-900 dark:text-white">The Silent Observer</h1>
-                <p className="text-lg text-slate-600 dark:text-slate-400 mt-1">by Amelia Stone</p>
-                <p className="text-sm text-slate-500 dark:text-slate-500 mt-1">Mystery, Thriller</p>
+                <h1 className="text-3xl font-bold text-slate-900 dark:text-white">{title}</h1>
+                <p className="text-lg text-slate-600 dark:text-slate-400 mt-1">by {author}</p>
+                <p className="text-sm text-slate-500 dark:text-slate-500 mt-1">{categories}</p>
               </div>
             </div>
           </div>
@@ -61,7 +77,10 @@ export default function BookDetailsPage() {
                     <div key={rating.stars} className="flex items-center gap-3">
                       <span className="text-sm font-medium w-4 text-right">{rating.stars}</span>
                       <div className="flex-1 h-2 bg-slate-200 dark:bg-slate-700 rounded-full">
-                        <div className="h-2 bg-blue-500 rounded-full" style={{ width: `${rating.percentage}%` }} />
+                        <div
+                          className="h-2 bg-blue-500 rounded-full"
+                          style={{ width: `${rating.percentage}%` }}
+                        />
                       </div>
                       <span className="text-sm text-slate-500 dark:text-slate-400 w-8 text-right">
                         {rating.percentage}%
@@ -72,7 +91,7 @@ export default function BookDetailsPage() {
               </div>
             </section>
 
-            {/* Individual Reviews */}
+            {/* Individual Reviews (Static) */}
             <div className="space-y-8">
               {[
                 {
@@ -81,7 +100,7 @@ export default function BookDetailsPage() {
                   time: "2 months ago",
                   rating: 5,
                   review:
-                    "Absolutely captivating! The Silent Observer kept me on the edge of my seat until the very last page. Amelia Stone is a master of suspense.",
+                    "Absolutely captivating! The story kept me on the edge of my seat until the last page. A master of suspense.",
                   likes: 25,
                   dislikes: 2,
                 },
@@ -91,7 +110,7 @@ export default function BookDetailsPage() {
                   time: "3 months ago",
                   rating: 4,
                   review:
-                    "A solid thriller with a few twists I didn't see coming. The characters were well-developed, and the plot moved at a good pace.",
+                    "A solid read with a few twists I didn't see coming. The characters were well-developed, and the plot moved at a good pace.",
                   likes: 18,
                   dislikes: 3,
                 },
@@ -101,7 +120,7 @@ export default function BookDetailsPage() {
                   time: "4 months ago",
                   rating: 5,
                   review:
-                    "This book is a masterpiece! The Silent Observer is a thrilling ride from start to finish. I couldn't put it down.",
+                    "This book is a masterpiece! A thrilling ride from start to finish. I couldn't put it down.",
                   likes: 32,
                   dislikes: 1,
                 },
@@ -127,7 +146,9 @@ export default function BookDetailsPage() {
                           {[...Array(5)].map((_, i) => (
                             <Star
                               key={i}
-                              className={`w-5 h-5 ${i < review.rating ? "fill-current" : "text-slate-300 dark:text-slate-600"}`}
+                              className={`w-5 h-5 ${
+                                i < review.rating ? "fill-current" : "text-slate-300 dark:text-slate-600"
+                              }`}
                             />
                           ))}
                         </div>

@@ -23,43 +23,6 @@ export default function AddReviewPage() {
 
   return (
     <div className="flex flex-col min-h-screen bg-slate-50 dark:bg-slate-900">
-      {/* Header */}
-      <header className="sticky top-0 z-10 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm border-b border-slate-200 dark:border-slate-800">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <div className="flex items-center gap-4">
-              <BookOpen className="w-7 h-7 text-blue-500" />
-              <h1 className="text-xl font-bold tracking-tight">NovelNest</h1>
-            </div>
-            <nav className="hidden md:flex items-center gap-6 text-sm font-medium">
-              <Link
-                className="text-slate-600 dark:text-slate-400 hover:text-blue-500 dark:hover:text-blue-500 transition-colors"
-                href="/"
-              >
-                Home
-              </Link>
-              <a className="text-blue-500 font-semibold" href="/add-review">
-                Explore
-              </a>
-              <a
-                className="text-slate-600 dark:text-slate-400 hover:text-blue-500 dark:hover:text-blue-500 transition-colors"
-                href="/collections"
-              >
-                My Books
-              </a>
-            </nav>
-            <div className="flex items-center gap-4">
-              <Button variant="ghost" size="icon" className="w-10 h-10 rounded-full">
-                <Bell className="h-5 w-5" />
-              </Button>
-              <Avatar className="w-10 h-10">
-                <AvatarImage src="/diverse-user-avatars.png" alt="User" />
-                <AvatarFallback>U</AvatarFallback>
-              </Avatar>
-            </div>
-          </div>
-        </div>
-      </header>
 
       {/* Main Content */}
       <main className="flex-grow container mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
