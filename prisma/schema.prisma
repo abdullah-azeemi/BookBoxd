@@ -9,77 +9,94 @@ datasource db {
 
 // Clerk user sync — Clerk manages auth, but we store app data
 model User {
-  id          String       @id @default(cuid())
-  clerkId     String       @unique
-  email       String?      @unique
-  username    String?      @unique
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
+  id        String   @id @default(cuid())
+  clerkId   String   @unique
+  email     String?  @unique
+  username  String?  @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   // Relations
-  reviews     Review[]
-  userBooks   UserBook[]
-  followers   UserFollow[] @relation("followers")
-  following   UserFollow[] @relation("following")
+  reviews   Review[]
+  userBooks UserBook[]
+  followers UserFollow[] @relation("followers")
+  following UserFollow[] @relation("following")
+  ratings   Rating[]
 }
 
 model Book {
-  id          String       @id @default(cuid())
-  externalId  String?      @unique // ID from Open Library / Google Books
+  id          String  @id @default(cuid())
+  externalId  String? @unique // ID from Open Library / Google Books
   title       String
   author      String
   description String?
   genre       String?
   coverUrl    String?
 
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   // Relations
-  reviews     Review[]
-  userBooks   UserBook[]
+  reviews   Review[]
+  userBooks UserBook[]
+  ratings   Rating[]
 }
 
 model Review {
   id        String   @id @default(cuid())
   content   String
-  rating    Int      // 1–5
+  rating    Int // 1–5
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   // Relations
-  user   User @relation(fields: [userId], references: [id])
+  user   User   @relation(fields: [userId], references: [id])
   userId String
 
-  book   Book @relation(fields: [bookId], references: [id])
+  book   Book   @relation(fields: [bookId], references: [id])
   bookId String
+}
+
+model Rating {
+  id        String   @id @default(cuid())
+  value     Int // 1–5 stars
+  createdAt DateTime @default(now())
+
+  // Relations
+  user   User   @relation(fields: [userId], references: [id])
+  userId String
+
+  book   Book   @relation(fields: [bookId], references: [id])
+  bookId String
+
+  @@unique([userId, bookId]) // each user can rate a book only once
 }
 
 model UserBook {
   id        String   @id @default(cuid())
-  status    String   // e.g. "reading", "completed", "want-to-read"
+  status    String // e.g. "reading", "completed", "want-to-read"
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   // Relations
-  user   User @relation(fields: [userId], references: [id])
+  user   User   @relation(fields: [userId], references: [id])
   userId String
 
-  book   Book @relation(fields: [bookId], references: [id])
+  book   Book   @relation(fields: [bookId], references: [id])
   bookId String
 
   @@unique([userId, bookId]) // prevents duplicates
 }
 
 model UserFollow {
-  id          String   @id @default(cuid())
-  createdAt   DateTime @default(now())
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
 
   // Relations
-  follower   User @relation("followers", fields: [followerId], references: [id])
+  follower   User   @relation("followers", fields: [followerId], references: [id])
   followerId String
 
-  following  User @relation("following", fields: [followingId], references: [id])
+  following   User   @relation("following", fields: [followingId], references: [id])
   followingId String
 
   @@unique([followerId, followingId]) // prevents duplicate follows
