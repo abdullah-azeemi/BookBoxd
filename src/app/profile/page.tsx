@@ -18,41 +18,6 @@ export default function ProfilePage() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="border-b border-border px-4 md:px-10 py-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-8">
-            <div className="flex items-center gap-3">
-              <BookOpen className="h-6 w-6 text-primary" />
-              <h2 className="text-xl font-bold">BookBoxd</h2>
-            </div>
-            <nav className="hidden md:flex items-center gap-6">
-              <Link className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors" href="#">
-                Home
-              </Link>
-              <Link className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors" href="#">
-                Explore
-              </Link>
-              <Link className="text-sm font-bold text-primary" href="#">
-                My Books
-              </Link>
-            </nav>
-          </div>
-          <div className="flex items-center gap-4">
-            <div className="relative w-full max-w-xs">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <input
-                className="w-full rounded-lg border border-input bg-background px-10 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-                placeholder="Search"
-              />
-            </div>
-            <Avatar className="h-10 w-10">
-              <AvatarImage src="https://lh3.googleusercontent.com/aida-public/AB6AXuBIMrJPoKWjtK5ua0-KkqWQn-ZlwzYP4r9o8ZI65al99SShITvwRFAZevVQLY7QyRIU2pyx4g0K2Dff62ZdKjUW7WXSi8Y6LCj0clCy_qrUQF4MavpCzXmJlY8MmZGVriDmm9HhYkom19gdwNEirixSfG7ore-Ev-N9RZkPZcQX8HP2blOauhQwJ4IFpqljPNKP44TRpXoBURBZlNRGoVThuKkmhEhe6lPVDttum5vneTVu9SYBzScrkbo5WEQQP04-Pmc_YeoXCvI" />
-              <AvatarFallback>SB</AvatarFallback>
-            </Avatar>
-          </div>
-        </div>
-      </header>
 
       {/* Main Content */}
       <main className="px-4 md:px-10 lg:px-20 xl:px-40 py-10">

@@ -44,16 +44,14 @@ export async function POST(req: Request) {
 }
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url)
-  const externalId = searchParams.get("bookId") // this is Google Books ID
+  const externalId = searchParams.get("bookId") 
   if (!externalId) return NextResponse.json({ reviews: [] })
 
-  // Find internal book id
   const book = await prisma.book.findUnique({ where: { externalId } })
   if (!book) return NextResponse.json({ reviews: [] })
 
-  // Fetch reviews using internal id
   const reviews = await prisma.review.findMany({
-    where: { bookId: book.id }, // internal Prisma ID
+    where: { bookId: book.id }, 
     include: { user: true },
     orderBy: { createdAt: "desc" },
   })

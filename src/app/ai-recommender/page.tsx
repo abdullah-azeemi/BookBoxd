@@ -1,121 +1,128 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Input } from "@/components/ui/input"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Search, BookOpen } from "lucide-react"
+import { useState } from "react";
 
-import Link from "next/link"
+interface Book {
+  title: string;
+  author: string;
+  cover?: string;
+  description?: string; 
+}
 
 export default function AIRecommenderPage() {
-  const [searchQuery, setSearchQuery] = useState("")
+  const [recommendedBooks, setRecommendedBooks] = useState<Book[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
 
-  const recommendedBooks = [
-    { title: "The Secret Garden", author: "Frances Hodgson Burnett", cover: "/placeholder.svg?height=300&width=200" },
-    { title: "The Alchemist", author: "Paulo Coelho", cover: "/placeholder.svg?height=300&width=200" },
-    { title: "Pride and Prejudice", author: "Jane Austen", cover: "/placeholder.svg?height=300&width=200" },
-    { title: "To Kill a Mockingbird", author: "Harper Lee", cover: "/placeholder.svg?height=300&width=200" },
-    { title: "1984", author: "George Orwell", cover: "/placeholder.svg?height=300&width=200" },
-    { title: "The Great Gatsby", author: "F. Scott Fitzgerald", cover: "/placeholder.svg?height=300&width=200" },
-    { title: "The Catcher in the Rye", author: "J.D. Salinger", cover: "/placeholder.svg?height=300&width=200" },
-    { title: "Lord of the Flies", author: "William Golding", cover: "/placeholder.svg?height=300&width=200" },
-    { title: "The Hobbit", author: "J.R.R. Tolkien", cover: "/placeholder.svg?height=300&width=200" },
-    { title: "Jane Eyre", author: "Charlotte Brontë", cover: "/placeholder.svg?height=300&width=200" },
-    { title: "Wuthering Heights", author: "Emily Brontë", cover: "/placeholder.svg?height=300&width=200" },
-    { title: "The Picture of Dorian Gray", author: "Oscar Wilde", cover: "/placeholder.svg?height=300&width=200" },
-  ]
+  async function handleAIRecommend() {
+    try {
+      setLoading(true);
+      setRecommendedBooks([]); 
+
+      const res = await fetch("/api/ai-recommend", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ query: searchQuery }),
+      });
+
+      const data = await res.json();
+      
+      if (data.error) {
+        alert(`Error from server: ${data.error}`);
+        console.error("Server error:", data.details);
+        setRecommendedBooks([]);
+        return; 
+      }
+      
+      const booksToDisplay: Book[] = data?.booksWithDetails || [];
+      setRecommendedBooks(booksToDisplay);
+
+    } catch (err) {
+      console.error("AI recommend error:", err);
+      alert("An unexpected error occurred. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  }
 
   return (
     <div className="flex min-h-screen w-full flex-col bg-slate-50 dark:bg-slate-900">
-      {/* Header */}
-      <header className="sticky top-0 z-10 w-full border-b border-slate-200/80 bg-white/80 backdrop-blur-sm dark:border-slate-800/80 dark:bg-slate-900/80">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center gap-8">
-            <Link className="flex items-center gap-3 text-slate-900 dark:text-white" href="/">
-              <BookOpen className="h-6 w-6 text-blue-500" />
-              <h2 className="text-xl font-bold tracking-tight">NovelNest</h2>
-            </Link>
-            <nav className="hidden items-center gap-6 md:flex">
-              <Link
-                className="text-sm font-medium text-slate-600 transition-colors hover:text-blue-500 dark:text-slate-300 dark:hover:text-blue-500"
-                href="/"
-              >
-                Home
-              </Link>
-              <Link className="text-sm font-medium text-blue-500" href="/ai-recommender">
-                Explore
-              </Link>
-              <Link
-                className="text-sm font-medium text-slate-600 transition-colors hover:text-blue-500 dark:text-slate-300 dark:hover:text-blue-500"
-                href="/collections"
-              >
-                My Books
-              </Link>
-              <Link
-                className="text-sm font-medium text-slate-600 transition-colors hover:text-blue-500 dark:text-slate-300 dark:hover:text-blue-500"
-                href="#"
-              >
-                Reviews
-              </Link>
-              <Link
-                className="text-sm font-medium text-slate-600 transition-colors hover:text-blue-500 dark:text-slate-300 dark:hover:text-blue-500"
-                href="#"
-              >
-                Community
-              </Link>
-            </nav>
-          </div>
-          <div className="flex items-center justify-end gap-4">
-            <div className="relative hidden sm:block">
-              <Search className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 dark:text-slate-500" />
-              <Input
-                className="w-full rounded-lg border-slate-300 bg-white/70 py-2 pl-10 pr-4 text-sm text-slate-900 placeholder:text-slate-400 focus:border-blue-500 focus:ring-blue-500 dark:border-slate-700 dark:bg-slate-900/70 dark:text-white dark:placeholder:text-slate-500 dark:focus:border-blue-500"
-                placeholder="Search books..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-            </div>
-            <Avatar className="h-10 w-10 shrink-0">
-              <AvatarImage src="/diverse-user-avatars.png" alt="User avatar" />
-              <AvatarFallback>U</AvatarFallback>
-            </Avatar>
-          </div>
-        </div>
-      </header>
-
-      {/* Main Content */}
       <main className="flex-1">
         <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
           <div className="mb-8">
             <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-4xl">
               Recommended For You
             </h1>
-            <p className="mt-2 text-base text-slate-600 dark:text-slate-400">
-              Based on your reading history, here are some books we think you'll love.
-            </p>
+
+            <input
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Describe the type of book you want..."
+              className="mt-4 px-4 py-2 w-full bg-white dark:bg-slate-800 rounded border border-slate-300 dark:border-slate-700"
+            />
+
+            <button
+              onClick={handleAIRecommend}
+              disabled={loading}
+              className="mt-4 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-50"
+            >
+              {loading ? "Loading..." : "AI Recommend "}
+            </button>
           </div>
 
           <div className="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 xl:gap-x-6">
-            {recommendedBooks.map((book, index) => (
-              <div key={index} className="group book-card">
-                <div className="w-full overflow-hidden rounded-lg">
-                  <div className="aspect-[2/3] w-full bg-cover bg-center book-cover hover:scale-105 transition-transform duration-300">
-                    <img
-                      src={book.cover || "/placeholder.svg"}
-                      alt={book.title}
-                      className="w-full h-full object-cover rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300"
-                    />
+            
+            {loading && recommendedBooks.length === 0 ? (
+              Array(10) // Show 10 placeholders if nothing loaded yet
+                  .fill(null)
+                  .map((_, idx) => (
+                    <div key={idx} className="group book-card">
+                      <div className="w-full overflow-hidden rounded-lg aspect-[2/3] bg-slate-200 dark:bg-slate-800 animate-pulse" />
+                      <div className="mt-3">
+                        <p className="truncate text-sm font-semibold text-slate-800 dark:text-slate-200">
+                          Loading...
+                        </p>
+                        <p className="text-sm text-slate-500 dark:text-slate-400">
+                          Loading...
+                        </p>
+                      </div>
+                    </div>
+                  ))
+            ) : recommendedBooks.length > 0 ? (
+              recommendedBooks.map((book) => (
+                  <div key={book.title} className="group book-card">
+                    <div className="w-full overflow-hidden rounded-lg aspect-[2/3] bg-slate-200 dark:bg-slate-800">
+                      {book.cover && book.cover !== "/placeholder.svg" ? (
+                        <img
+                          src={book.cover}
+                          alt={`Cover for ${book.title}`}
+                          className="w-full h-full object-cover group-hover:opacity-75"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center p-2 text-center">
+                          <span className="text-center text-slate-700 dark:text-slate-300 px-2 text-sm">
+                            {book.title}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                    <div className="mt-3">
+                      <p className="truncate text-sm font-semibold text-slate-800 dark:text-slate-200">
+                        {book.title}
+                      </p>
+                      <p className="text-sm text-slate-500 dark:text-slate-400">
+                        {book.author}
+                      </p>
+                    </div>
                   </div>
-                </div>
-                <div className="mt-3">
-                  <h3 className="truncate text-sm font-semibold text-slate-800 dark:text-slate-200">{book.title}</h3>
-                  <p className="text-sm text-slate-500 dark:text-slate-400">{book.author}</p>
-                </div>
-              </div>
-            ))}
+                ))
+            ) : (
+              !loading && <p className="text-slate-500 dark:text-slate-400">No recommendations found. Try a different query!</p>
+            )}
+            
           </div>
         </div>
       </main>
     </div>
-  )
+  );
 }

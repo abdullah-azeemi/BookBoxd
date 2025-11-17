@@ -23,11 +23,25 @@ export default function ReviewsAndRatings({ bookId, bookTitle, bookAuthor }: Rev
   const [newRating, setNewRating] = useState(5)
   const userId = "user1" // replace with actual logged-in user id
 
+  const [averageRating, setAverageRating] = useState(0);
+  const [ratingCount, setRatingCount] = useState(0);
+
+  
+
   useEffect(() => {
-    fetch(`/api/reviews?bookId=${bookId}`)
-      .then(res => res.json())
-      .then(data => setReviews(data.reviews || []))
-  }, [bookId])
+    // Fetch reviews
+  fetch(`/api/reviews?bookId=${bookId}`)
+    .then(res => res.json())
+    .then(data => setReviews(data.reviews || []));
+
+    // Fetch rating summary
+  fetch(`/api/ratings?bookId=${bookId}`)
+    .then(res => res.json())
+    .then(data => {
+      setAverageRating(data.average || 0);
+      setRatingCount(data.count || 0);
+    });
+}, [bookId]);
 
   const submitReview = async () => {
     if (!newReview) return
@@ -74,6 +88,8 @@ export default function ReviewsAndRatings({ bookId, bookTitle, bookAuthor }: Rev
               </AvatarFallback>
             </Avatar>
 
+            
+
             <div className="flex-1">
               {review ? (
                 <>
@@ -111,6 +127,8 @@ export default function ReviewsAndRatings({ bookId, bookTitle, bookAuthor }: Rev
           </article>
         ))}
       </div>
+
+      
 
       {/* Post Review */}
       <div className="mt-8">

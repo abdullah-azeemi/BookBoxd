@@ -1,59 +1,11 @@
-import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { BookOpen, Search, Bell, ArrowRight } from "lucide-react"
+import {  Search, ArrowRight } from "lucide-react"
 import Link from "next/link"
 
 export default function HomeFeedPage() {
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
-      {/* Header */}
-      <header className="sticky top-0 z-10 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm border-b border-slate-200 dark:border-slate-800">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <div className="flex items-center gap-8">
-              <div className="flex items-center gap-2 text-blue-500">
-                <BookOpen className="h-8 w-8" />
-                <h1 className="text-xl font-bold">NovelNest</h1>
-              </div>
-              <nav className="hidden md:flex items-center gap-6">
-                <Link href="/home" className="text-sm font-medium text-slate-900 dark:text-white">
-                  Home
-                </Link>
-                <Link
-                  href="/explore"
-                  className="text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-blue-500 transition-colors"
-                >
-                  Explore
-                </Link>
-                <Link
-                  href="/profile"
-                  className="text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-blue-500 transition-colors"
-                >
-                  My Reviews
-                </Link>
-              </nav>
-            </div>
-            <div className="flex items-center gap-4">
-              <div className="relative hidden sm:block">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
-                <input
-                  className="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-full h-10 pl-10 pr-4 w-48 focus:w-64 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
-                  placeholder="Search books..."
-                  type="text"
-                />
-              </div>
-              <Button variant="ghost" size="icon" className="text-slate-600 dark:text-slate-300">
-                <Bell className="h-5 w-5" />
-              </Button>
-              <Avatar className="h-10 w-10">
-                <AvatarImage src="/user-avatar-sarah.png" />
-                <AvatarFallback>S</AvatarFallback>
-              </Avatar>
-            </div>
-          </div>
-        </div>
-      </header>
+      
 
       <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="max-w-5xl mx-auto">
