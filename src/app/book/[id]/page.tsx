@@ -1,6 +1,6 @@
-
 import Link from "next/link"
 import ReviewsAndRatings from "./ReviewsAndRatings"
+import BookStatusButton from "@/components/BookStatusButton";
 
 interface Book {
   id: string
@@ -26,7 +26,6 @@ export default async function BookDetailsPage(props: { params: Promise<{ id: str
   return (
     <div className="flex flex-col min-h-screen bg-slate-50 dark:bg-slate-900">
       <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-grow">
-        {/* Breadcrumb */}
         <div className="mb-6 text-sm text-slate-500 dark:text-slate-400">
           <Link href="/collections" className="hover:text-blue-500 dark:hover:text-blue-500">
             Books
@@ -36,7 +35,6 @@ export default async function BookDetailsPage(props: { params: Promise<{ id: str
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-12">
-          {/* Book Cover and Info */}
           <div className="lg:col-span-1">
             <div className="sticky top-24">
               <div
@@ -50,9 +48,16 @@ export default async function BookDetailsPage(props: { params: Promise<{ id: str
               </div>
             </div>
           </div>
-
-          {/* Reviews Section */}
           <div className="lg:col-span-2">
+            <div className="mb-6">
+              <BookStatusButton
+                externalBookId={id}
+                title={title}
+                author={author}
+                coverUrl={cover}
+              />
+            </div>
+            
             <ReviewsAndRatings bookId={id} bookTitle={title} bookAuthor={author} />
           </div>
         </div>

@@ -11,7 +11,7 @@ export default function HomeFeedPage() {
         <div className="max-w-5xl mx-auto">
           {/* Welcome Section */}
           <div className="mb-12">
-            <h2 className="text-3xl font-bold mb-4">Welcome back, Sarah</h2>
+            <h2 className="text-3xl font-bold mb-4">Welcome back, Abdullah</h2>
             <div className="relative">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
               <input

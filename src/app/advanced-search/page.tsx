@@ -7,50 +7,6 @@ import Link from "next/link"
 export default function AdvancedSearchPage() {
   return (
     <div className="flex flex-col min-h-screen bg-slate-50 dark:bg-slate-900">
-      {/* Header */}
-      <header className="border-b border-slate-200 dark:border-slate-700 bg-slate-50/80 dark:bg-slate-900/80 backdrop-blur-sm sticky top-0 z-10">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <div className="flex items-center gap-8">
-              <Link href="/" className="flex items-center gap-2 text-slate-900 dark:text-white">
-                <BookOpen className="h-6 w-6 text-blue-500" />
-                <h1 className="text-xl font-bold">NovelNest</h1>
-              </Link>
-              <nav className="hidden md:flex items-center gap-6">
-                <Link className="text-sm font-medium hover:text-blue-500 transition-colors" href="/home">
-                  Home
-                </Link>
-                <Link className="text-sm font-medium hover:text-blue-500 transition-colors" href="/collections">
-                  My Books
-                </Link>
-                <Link className="text-sm font-bold text-blue-500" href="/advanced-search">
-                  Explore
-                </Link>
-              </nav>
-            </div>
-            <div className="flex items-center gap-4">
-              <div className="hidden sm:flex relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Search className="h-5 w-5 text-slate-400" />
-                </div>
-                <Input
-                  className="w-full pl-10 pr-4 py-2 rounded-lg border-transparent bg-slate-100 dark:bg-slate-800 placeholder-slate-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Search..."
-                  type="search"
-                />
-              </div>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-              >
-                <Bell className="h-6 w-6 text-slate-400" />
-              </Button>
-              <div className="h-10 w-10 rounded-full bg-slate-300 dark:bg-slate-700"></div>
-            </div>
-          </div>
-        </div>
-      </header>
 
       <main className="flex-grow container mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="max-w-screen-xl mx-auto">

@@ -8,15 +8,13 @@ export async function POST(req: Request) {
 
   if (payload.type === "user.created") {
     const { id, email_addresses, username } = payload.data;
-
     await prisma.user.create({
-      data: {
-        id,
-        clerkId: id,
-        email: email_addresses[0]?.email_address,
-        username: username || `user_${id.slice(0, 6)}`,
-      },
-    });
+    data: {
+      clerkId: id, 
+      email: email_addresses[0]?.email_address,
+      username: username || `user_${id.slice(0, 6)}`,
+    },
+  });
   }
 
   return NextResponse.json({ status: "ok" });
