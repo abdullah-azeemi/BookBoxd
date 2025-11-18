@@ -4,14 +4,15 @@ import { auth } from "@clerk/nextjs/server";
 
 export async function GET() {
   const { userId } = auth();
-  if (!userId) {
+  const effectiveUserId = userId ?? process.env.DEV_FAKE_USER_ID;
+  if (!effectiveUserId) {
     return NextResponse.json({ error: "Not authorized" }, { status: 401 });
   }
 
   try {
     const userBooks = await prisma.userBook.findMany({
       where: {
-        userId: userId,
+        userId: effectiveUserId!,
       },
       include: {
         book: true, 
@@ -26,7 +27,8 @@ export async function GET() {
 
 export async function POST(req: Request) {
   const { userId } = auth();
-  if (!userId) {
+  const effectiveUserId = userId ?? process.env.DEV_FAKE_USER_ID ;
+  if (!effectiveUserId) {
     return NextResponse.json({ error: "Not authorized" }, { status: 401 });
   }
 
@@ -38,6 +40,11 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Missing externalBookId or status" }, { status: 400 });
     }
 
+    await prisma.user.upsert({
+      where: { clerkId: effectiveUserId },
+      update: {},
+      create: { id: effectiveUserId, clerkId: effectiveUserId }
+    });
     const book = await prisma.book.upsert({
       where: { externalId: externalBookId },
       update: {
@@ -56,7 +63,7 @@ export async function POST(req: Request) {
     const userBook = await prisma.userBook.upsert({
       where: {
         userId_bookId: {
-          userId: userId,
+          userId: effectiveUserId,
           bookId: book.id,
         },
       },
@@ -64,7 +71,7 @@ export async function POST(req: Request) {
         status: status,
       },
       create: {
-        userId: userId,
+        userId: effectiveUserId,
         bookId: book.id,
         status: status,
       },

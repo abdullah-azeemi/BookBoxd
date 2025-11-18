@@ -1,6 +1,6 @@
 import Link from "next/link"
 import ReviewsAndRatings from "./ReviewsAndRatings"
-import BookStatusButton from "@/components/BookStatusButton";
+import BookStatusButton from "@/components/ui/BookStatusButton";
 
 interface Book {
   id: string

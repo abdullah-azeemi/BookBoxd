@@ -7,7 +7,8 @@ export async function GET(
   { params }: { params: { externalId: string } }
 ) {
   const { userId } = auth();
-  if (!userId) {
+  const effectiveUserId = userId ?? process.env.DEV_FAKE_USER_ID;
+  if (!effectiveUserId) {
     return NextResponse.json({ error: "Not authorized" }, { status: 401 });
   }
 
@@ -25,7 +26,7 @@ export async function GET(
     const userBook = await prisma.userBook.findUnique({
       where: {
         userId_bookId: {
-          userId: userId,
+          userId: effectiveUserId,
           bookId: book.id,
         },
       },

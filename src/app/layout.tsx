@@ -1,7 +1,7 @@
 import type React from "react"
 import type { Metadata } from "next"
 import { GeistSans } from "geist/font/sans"
-import { GeistMono } from "geist/font/mono"
+
 import { Analytics } from "@vercel/analytics/next"
 import { Suspense } from "react"
 import SearchBar from "@/components/ui/SearchBar"
@@ -35,7 +35,7 @@ export default function RootLayout({
   return (
     <ClerkProvider >
       <html lang="en">
-        <body className={`font-sans ${GeistSans.variable} ${GeistMono.variable}`}>
+        <body className={`font-sans ${GeistSans.variable}`}>
           <header className="sticky top-0 z-10 w-full bg-slate-50/80 dark:bg-slate-900/80 backdrop-blur-sm">
         <div className="container mx-auto flex items-center justify-between px-4 py-3 sm:px-6 lg:px-8">
           <Link href="/" className="flex items-center gap-2">

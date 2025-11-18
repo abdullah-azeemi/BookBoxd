@@ -68,6 +68,7 @@ export default function CollectionsPage() {
     window.addEventListener("bookSearch", handleSearch as EventListener);
     return () => window.removeEventListener("bookSearch", handleSearch as EventListener);
   }, []);
+  
   const renderBookList = (books: UserBookWithBook[]) => (
     <div className="flex space-x-6 overflow-x-auto pb-4 scrollbar-hide">
       {books.slice(0, 8).map((userBook) => (
@@ -151,7 +152,7 @@ export default function CollectionsPage() {
           </section>
         )}
 
-         <section>
+        <section>
           <h2 className="text-2xl font-bold mb-4">Auto-generated Reading Lists</h2>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <Card className="bg-blue-50 dark:bg-blue-950/20 hover:shadow-xl transition-shadow duration-300">

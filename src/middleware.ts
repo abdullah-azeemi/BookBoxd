@@ -1,6 +1,10 @@
-import { clerkMiddleware } from '@clerk/nextjs/server';
+import { clerkMiddleware } from "@clerk/nextjs/server";
 
-export default clerkMiddleware();
+export default clerkMiddleware({
+  publicRoutes: process.env.NODE_ENV === "development"
+    ? ["/api/user-books", "/api/user-books/:path*"]
+    : []
+});
 
 export const config = {
   matcher: [
