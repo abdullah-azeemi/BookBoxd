@@ -1,9 +1,15 @@
 import { Card } from "@/components/ui/card"
-import { Search, ArrowRight } from "lucide-react"
+import { Search } from "lucide-react"
 import Link from "next/link"
 import ImageWithFallback from "@/components/ui/ImageWithFallback" 
-interface ReviewResponse {
-  reviews: Array<{
+
+interface Recommendation {
+    title: string;
+    author: string;
+    coverQuery: string;
+}
+
+interface Review {
     id: string;
     content: string;
     createdAt: string;
@@ -16,12 +22,19 @@ interface ReviewResponse {
     user: {
       username: string;
     };
-  }>;
+}
+
+interface HomeDataResponse {
+    reviews: Review[];
+    recommendations: Recommendation[];
+    errors?: string[]; 
 }
 
 
 export default async function HomeFeedPage() {
-  let reviews: ReviewResponse['reviews'] = [];
+  let reviews: Review[] = [];
+  let recommendations: Recommendation[] = [];
+  let fetchError: string | null = null;
 
   try {
     const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/review`, {
@@ -29,14 +42,25 @@ export default async function HomeFeedPage() {
     });
 
     if (res.ok) {
-        const data: ReviewResponse = await res.json();
-        reviews = data.reviews;
+        const data: HomeDataResponse = await res.json();
+        
+        reviews = Array.isArray(data.reviews) ? data.reviews : [];
+        recommendations = Array.isArray(data.recommendations) ? data.recommendations : [];
+
+        if (data.errors && data.errors.length > 0) {
+            console.error("Backend errors during data fetch:", data.errors.join("; "));
+            fetchError = "Some data failed to load. Check the console for details.";
+        }
+
     } else {
-        console.error(`Failed to fetch reviews: ${res.status} ${res.statusText}`);
+        console.error(`Failed to fetch home data: ${res.status} ${res.statusText}`);
+        fetchError = `Failed to load home feed data: ${res.statusText}`;
     }
   } catch (e) {
-    console.error("Error fetching reviews:", e);
+    console.error("Error fetching home data:", e);
+    fetchError = "Network error or connection failed.";
   }
+
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
@@ -54,40 +78,41 @@ export default async function HomeFeedPage() {
               />
             </div>
           </div>
+          
+          {/* Display general fetch error if present */}
+          {fetchError && (
+              <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-8" role="alert">
+                  <strong className="font-bold">Error:</strong>
+                  <span className="block sm:inline ml-2">{fetchError}</span>
+              </div>
+          )}
 
           <section className="mb-12">
             <h3 className="text-2xl font-bold mb-6">Recommended for you</h3>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
-              {[
-                { title: "The Whispering Woods", author: "Amelia Stone", cover: "mystery forest book cover" },
-                { title: "Shadows of the Past", author: "David Blackwood", cover: "dark thriller book cover" },
-                { title: "Echoes of Tomorrow", author: "Clara Hayes", cover: "sci-fi book cover" },
-                { title: "The Forgotten Kingdom", author: "Thomas Ashton", cover: "fantasy kingdom book cover" },
-              ].map((book, index) => (
-                <div key={index} className="group cursor-pointer">
-                  <div className="aspect-[3/4] mb-3">
-                    <img
-                      alt={`${book.title} cover`}
-                      className="w-full h-full object-cover rounded-lg shadow-md group-hover:shadow-xl group-hover:-translate-y-1 transition-all duration-300"
-                      src={`/abstract-geometric-shapes.png?height=320&width=240&query=${book.cover}`}
-                    />
+              {recommendations.length === 0 ? (
+                  <div className="col-span-full text-center py-4 text-slate-500 italic">
+                      No personalized recommendations available right now.
                   </div>
-                  <div>
-                    <p className="font-semibold text-sm truncate">{book.title}</p>
-                    <p className="text-xs text-slate-600 dark:text-slate-400">{book.author}</p>
-                  </div>
-                </div>
-              ))}
-              <div className="group cursor-pointer">
-                <div className="aspect-[3/4] mb-3 bg-slate-100 dark:bg-slate-800 rounded-lg flex items-center justify-center">
-                  <div className="w-12 h-12 bg-blue-500/10 rounded-full flex items-center justify-center">
-                    <ArrowRight className="h-6 w-6 text-blue-500" />
-                  </div>
-                </div>
-                <div>
-                  <p className="font-semibold text-sm text-center">View More</p>
-                </div>
-              </div>
+              ) : (
+                  recommendations.map((book, index) => (
+                    <div key={index} className="group cursor-pointer">
+                      {/* Recommendations use a standard 3/4 aspect ratio */}
+                      <div className="aspect-[3/4] mb-3 overflow-hidden">
+                        <img
+                          alt={`${book.title} cover`}
+                          className="w-full h-full object-cover rounded-lg shadow-md group-hover:shadow-xl group-hover:scale-[1.02] transition-all duration-300"
+                        
+                          src={`/abstract-geometric-shapes.png?height=320&width=240&query=${encodeURIComponent(book.coverQuery)}`}
+                        />
+                      </div>
+                      <div>
+                        <p className="font-semibold text-sm truncate">{book.title}</p>
+                        <p className="text-xs text-slate-600 dark:text-slate-400">{book.author}</p>
+                      </div>
+                    </div>
+                  ))
+              )}
             </div>
           </section>
 
@@ -104,11 +129,11 @@ export default async function HomeFeedPage() {
                   >
                     <Link
                       href={`/book/${review.book.externalId}`}
-                      className="flex-shrink-0 w-full md:w-1/4 h-auto object-cover rounded" 
+                      className="flex-shrink-0 w-24 h-32 md:w-32 md:h-40 overflow-hidden rounded shadow-md border border-slate-200 dark:border-slate-700" 
                     >
                        <ImageWithFallback
                         alt={`${review.book.title} cover`}
-                        className="w-full h-auto object-cover rounded max-h-64"
+                        className="w-full h-full object-contain rounded" 
                         src={review.book.coverUrl || `/abstract-geometric-shapes.png?height=320&width=240&query`} 
                         fallbackSrc="/placeholder.svg"
                       />
