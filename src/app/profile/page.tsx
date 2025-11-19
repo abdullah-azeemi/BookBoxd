@@ -2,19 +2,36 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Search, BookOpen } from "lucide-react"
-import Link from "next/link"
+import { BookOpen } from "lucide-react"
 import Image from "next/image"
 
-export default function ProfilePage() {
-  const bookCovers = [
-    "https://lh3.googleusercontent.com/aida-public/AB6AXuAAkuAtoD58QZrfW0bj38-Iof_illoOpI50Cect-tZmn4-1ckK5WudRc73J5UCL-SgwlBC77_zYZjP_p9gCR2ngezaa_D4izW_6stWzWMkljnSpTwovAZm08QhmYkOwSnuJS9KsBUBoAOT7cmF8ZpKH8q6Ig-6rzKyO5maSfJ-lhHO5nVX9ChdO6XU1vwFRfgXDYnCOsjB6bTQSk9hE47EIJIfFFUiWwn4F04vNc7OE4QyFxaB8u4J69sEgVr5AgA0LhS0AgnuwtzA",
-    "https://lh3.googleusercontent.com/aida-public/AB6AXuDrihY5B6_I2cLjyV_XlAAxMimGrkdTT6QP1TCyqrGOzQ9jnkpar9-3zvyl7XjTF4qijNRw2lPGfLPG4zH3-8vI7njK6lqCADlAJu2HRvHuEOs6VsRgzi1wmiLWnsVCOfbRaLcXEewQdafqsAMr0BmlgVvcAjrcrEhR37bVpO44GZen1dyyRnhpfc6lhVn9vD5Kt-wFI1zsdrvBkPTV-t0UMV2nz-bKCEViIPP0m4PNaHQmpSy1KNrbK7-iO2VAcyGQIY9L4b9vxmc",
-    "https://lh3.googleusercontent.com/aida-public/AB6AXuAO7mOOdNbQUbLeKPMGzWb1u9WTzYlw01OWRJ6AMvRJh6Jf5-5od1tplSMUzkr1WZE9rxa4rtnTkAHRRwv1TFNWzYFZZTXCtmIM5FLusrsaI1vzavJcXgw_75VjUs2tXhYyxEhFdw8HOfERra4meZcHRpY_SC7bSpkG_29xANwNAZcuQbUEj0GV1BKeleloodfsYaSE9QXPpmTJtJhIr5wtTn-4C8jnS9ElObpkK18Vp8w2vHBpIJijou3bIWA2Q547sjea2Cm9PAI",
-    "https://lh3.googleusercontent.com/aida-public/AB6AXuDkWjKnzCcSp4rK-KwJTHHLSv92ur0qRwLei3ACE7KF7bCDm1afT4I73njQaTlJaBphVKdykWOOCCrJyGuS0MSQ9brEfEKRLe0AoNiUoT4qm1OWUOhN-hL2Lf1_IIS5OGENAoI2JCaBz0QCUw-UHCe4ZhHlwhmPUi2PFcm8MWtZkTdlYThDGOrekdkNXalnTilKDPVRkjyTNuhcNHX8QxckcgQLPA9RDq_WACi7xqQGcY3bQuWy5p9xaOBDtmf6ipF5qX2NoKCi4vE",
-    "https://lh3.googleusercontent.com/aida-public/AB6AXuDa-eZrIdffR2soSh4XQz3GseFLMdyIJFwvETF6gHGq0RMT_FkRkvOU04mklKq1KbQrPg34R9z6O8dVGgRRSm2qEdBMLYSdvocbQxMfNzndR2PCOO0KXxDbjLPARRbA9FTj3JU-3kWSnNTzYeSD5UAugj9XjbwO7z1ywrZ4zaSFwXViGkU-oUGnPkMjXQFzjlsY-gBWZQTcRPS9I_jI6jbqm_YusU14FA5GoO2NYYKO6f8SPh3gJ5SRqA47_dQekwPIFxdP9mHXdJk",
-    "https://lh3.googleusercontent.com/aida-public/AB6AXuB-p3SSiNmUpiAWuResPCX-z6GG8IG78WlU0ZajzcNVcIgTK1Drul4j9CTO-PHmj8D44flO3qLM1yGCh2mHStnbYT8ZVVknXEd7Vjo09uQJ38N6sSJshBaw3GyMszMOCk-s7FBQOWEPQsZzcE_UY5ghA4HwZIhZxjsCIbOk2Dc-Iqqb0dXj-qJq4eDEJEHSw03sTFZ42CVdiUk0pUbIaX_UQCQmhBqhOjlZW38QADD7HYJe5n4iXIZQIZ7RLCzvhYByWRg40Wsmq_k",
-  ]
+interface Book {
+  id: string
+  title: string
+  author: string
+  coverUrl: string
+  genre: string
+  rating?: number
+}
+
+interface UserProfileData {
+  user: { username: string; avatarUrl: string; joiningDate: string; tagLine: string }
+  bookshelf: { currentlyReading: Book[]; wantToRead: Book[]; read: Book[] }
+  stats: { totalBooksRead: number; favoriteGenre: string; averageRating: number; currentYearGoal: number; currentYearProgress: number; genreBreakdown: { genre: string; count: number }[] }
+  reviews: { id: string; bookTitle: string; bookId: string; content: string; rating: number; createdAt: string }[]
+}
+
+async function getProfile() {
+  const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || ""}/api/profile`, { cache: "no-store" })
+  if (!res.ok) return null
+  return res.json()
+}
+
+export default async function ProfilePage() {
+  const data: UserProfileData | null = await getProfile()
+  const bookshelf = data?.bookshelf || { currentlyReading: [], wantToRead: [], read: [] }
+  const stats = data?.stats || { totalBooksRead: 0, favoriteGenre: "Unknown", averageRating: 3, currentYearGoal: 60, currentYearProgress: 0, genreBreakdown: [] }
+  const user = data?.user || { username: "Anonymous", avatarUrl: "/placeholder-user.png", joiningDate: new Date().toISOString(), tagLine: "" }
 
   return (
     <div className="min-h-screen bg-background">
@@ -25,13 +42,13 @@ export default function ProfilePage() {
           {/* Profile Header */}
           <div className="flex flex-col items-center gap-6 text-center mb-10">
             <Avatar className="h-32 w-32">
-              <AvatarImage src="https://lh3.googleusercontent.com/aida-public/AB6AXuDwfGM3yqi0WDftnsJkRxp5C8oVP5IWP-vbbUasETXQqk0oRwUInnohGX_sUuMljjRVevBRebvz5MKIRCQBqhw2W-7TyLZO5FdXLGUiOT7I14D_7Ro6zdbSB7KBxf7LxgLk1bpTVrNLhlo1pTc365IyZiIM1Le8cCVOMeCRRkN7V6tQy1Xnw7x6cFytBZS99zJvaLy_P8R6IyQuj36zGJvb_hjW5KcKyzsgSUs_Fkl9Fk40XOP0271QBT7z0znL6CKvMhK6YoBbfy8" />
-              <AvatarFallback>SB</AvatarFallback>
+              <AvatarImage src={user.avatarUrl} />
+              <AvatarFallback>{(user.username || "A")[0]}</AvatarFallback>
             </Avatar>
             <div className="flex flex-col items-center gap-1">
-              <h1 className="text-3xl font-bold">Sophia Bennett</h1>
-              <p className="text-muted-foreground">Avid reader and book reviewer</p>
-              <p className="text-sm text-muted-foreground">Joined in 2025</p>
+              <h1 className="text-3xl font-bold">{user.username}</h1>
+              <p className="text-muted-foreground">{user.tagLine}</p>
+              <p className="text-sm text-muted-foreground">Joined {new Date(user.joiningDate).getFullYear()}</p>
             </div>
             <Button variant="outline" className="bg-primary/10 text-primary hover:bg-primary/20">
               Edit Profile
@@ -51,11 +68,13 @@ export default function ProfilePage() {
               <section>
                 <h2 className="text-2xl font-bold mb-6">Bookshelf</h2>
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-                  {bookCovers.map((cover, index) => (
-                    <div key={index} className="aspect-[3/4] rounded-lg overflow-hidden">
-                      <img
-                        src={cover || "/placeholder.svg"}
-                        alt={`Book cover ${index + 1}`}
+                  {bookshelf.read.concat(bookshelf.currentlyReading).concat(bookshelf.wantToRead).map((b, index) => (
+                    <div key={`${b.id}-${index}`} className="aspect-[3/4] rounded-lg overflow-hidden">
+                      <Image
+                        src={b.coverUrl || "/placeholder.svg"}
+                        alt={b.title}
+                        width={300}
+                        height={400}
                         className="w-full h-full object-cover hover:scale-105 transition-transform cursor-pointer"
                       />
                     </div>
@@ -71,7 +90,7 @@ export default function ProfilePage() {
                     <CardContent className="p-6">
                       <div className="flex flex-col gap-2">
                         <p className="text-base font-medium text-muted-foreground">Total Books Read</p>
-                        <p className="text-4xl font-bold">52</p>
+                        <p className="text-4xl font-bold">{stats.totalBooksRead}</p>
                       </div>
                     </CardContent>
                   </Card>
@@ -79,7 +98,7 @@ export default function ProfilePage() {
                     <CardContent className="p-6">
                       <div className="flex flex-col gap-2">
                         <p className="text-base font-medium text-muted-foreground">Favorite Genre</p>
-                        <p className="text-4xl font-bold">Fiction</p>
+                        <p className="text-4xl font-bold">{stats.favoriteGenre}</p>
                       </div>
                     </CardContent>
                   </Card>
@@ -87,7 +106,7 @@ export default function ProfilePage() {
                     <CardContent className="p-6">
                       <div className="flex flex-col gap-2">
                         <p className="text-base font-medium text-muted-foreground">Average Rating</p>
-                        <p className="text-4xl font-bold">4.5</p>
+                        <p className="text-4xl font-bold">{stats.averageRating.toFixed(2)}</p>
                       </div>
                     </CardContent>
                   </Card>
@@ -97,10 +116,26 @@ export default function ProfilePage() {
 
             <TabsContent value="reviews" className="space-y-6">
               <h2 className="text-2xl font-bold">Reviews</h2>
-              <div className="text-center py-12 text-muted-foreground">
-                <BookOpen className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                <p>No reviews yet. Start reading and share your thoughts!</p>
-              </div>
+              {(!data || !data.reviews || data.reviews.length === 0) ? (
+                <div className="text-center py-12 text-muted-foreground">
+                  <BookOpen className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                  <p>No reviews yet. Start reading and share your thoughts!</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 gap-4">
+                  {data.reviews.map((r) => (
+                    <Card key={r.id}>
+                      <CardContent className="p-6">
+                        <div className="flex items-center justify-between">
+                          <div className="font-semibold">{r.bookTitle}</div>
+                          <div className="text-sm">{r.rating} / 5</div>
+                        </div>
+                        <p className="mt-2 text-sm text-muted-foreground">{r.content}</p>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              )}
             </TabsContent>
 
             <TabsContent value="stats" className="space-y-6">
@@ -112,10 +147,10 @@ export default function ProfilePage() {
                     <div className="space-y-2">
                       <div className="flex justify-between text-sm">
                         <span>Books Read</span>
-                        <span>52 / 60</span>
+                        <span>{stats.currentYearProgress} / {stats.currentYearGoal}</span>
                       </div>
                       <div className="w-full bg-secondary rounded-full h-2">
-                        <div className="bg-primary h-2 rounded-full" style={{ width: "87%" }}></div>
+                        <div className="bg-primary h-2 rounded-full" style={{ width: `${Math.min(100, Math.round((stats.currentYearProgress / Math.max(1, stats.currentYearGoal)) * 100))}%` }}></div>
                       </div>
                     </div>
                   </CardContent>
@@ -124,18 +159,12 @@ export default function ProfilePage() {
                   <CardContent className="p-6">
                     <h3 className="font-semibold mb-4">Top Genres</h3>
                     <div className="space-y-3">
-                      <div className="flex justify-between">
-                        <span className="text-sm">Fiction</span>
-                        <span className="text-sm font-medium">28 books</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-sm">Mystery</span>
-                        <span className="text-sm font-medium">12 books</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-sm">Biography</span>
-                        <span className="text-sm font-medium">8 books</span>
-                      </div>
+                      {stats.genreBreakdown.slice(0, 5).map((g: { genre: string; count: number }) => (
+                        <div key={g.genre} className="flex justify-between">
+                          <span className="text-sm">{g.genre}</span>
+                          <span className="text-sm font-medium">{g.count} books</span>
+                        </div>
+                      ))}
                     </div>
                   </CardContent>
                 </Card>
