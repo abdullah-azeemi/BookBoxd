@@ -3,9 +3,7 @@
 import { useState } from 'react'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Search, Bell, BookOpen, Send } from 'lucide-react'
-import Link from "next/link"
-import Image from "next/image"
+import { BookOpen, Send } from 'lucide-react'
 
 export default function AdvancedSearchPage() {
   const [messages, setMessages] = useState([
