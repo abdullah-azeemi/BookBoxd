@@ -3,6 +3,8 @@
 import { useState, useEffect } from "react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Star, ThumbsUp, ThumbsDown } from "lucide-react"
+import Link from "next/link"
+import { Button } from "@/components/ui/button"
 
 interface Review {
   id: string
@@ -126,12 +128,16 @@ export default function ReviewsAndRatings({ bookId, bookTitle, bookAuthor }: Rev
             </div>
           </article>
         ))}
+
+        <Link href={`/add-review?bookId=${encodeURIComponent(bookId)}&title=${encodeURIComponent(bookTitle)}&author=${encodeURIComponent(bookAuthor)}`}>
+          <Button className="mt-8">Add Review</Button>
+        </Link>
       </div>
 
       
 
       {/* Post Review */}
-      <div className="mt-8">
+      {/* <div className="mt-8">
         <textarea
           value={newReview}
           onChange={e => setNewReview(e.target.value)}
@@ -156,7 +162,7 @@ export default function ReviewsAndRatings({ bookId, bookTitle, bookAuthor }: Rev
             Submit Review
           </button>
         </div>
-      </div>
+      </div> */}
     </section>
   )
 }

@@ -53,7 +53,7 @@ export default function RootLayout({
               href="/collections"
               className="text-sm font-medium text-slate-600 hover:text-blue-500 dark:text-slate-300 dark:hover:text-blue-500"
             >
-              Explore
+              Collections
             </Link>
             <Link
               href="/profile"

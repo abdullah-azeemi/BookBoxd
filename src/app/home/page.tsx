@@ -1,15 +1,48 @@
 import { Card } from "@/components/ui/card"
-import {  Search, ArrowRight } from "lucide-react"
+import { Search, ArrowRight } from "lucide-react"
 import Link from "next/link"
+import ImageWithFallback from "@/components/ui/ImageWithFallback" 
+interface ReviewResponse {
+  reviews: Array<{
+    id: string;
+    content: string;
+    createdAt: string;
+    book: {
+      externalId: string;
+      title: string;
+      author: string;
+      coverUrl: string;
+    };
+    user: {
+      username: string;
+    };
+  }>;
+}
 
-export default function HomeFeedPage() {
+
+export default async function HomeFeedPage() {
+  let reviews: ReviewResponse['reviews'] = [];
+
+  try {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/review`, {
+        cache: 'no-store' 
+    });
+
+    if (res.ok) {
+        const data: ReviewResponse = await res.json();
+        reviews = data.reviews;
+    } else {
+        console.error(`Failed to fetch reviews: ${res.status} ${res.statusText}`);
+    }
+  } catch (e) {
+    console.error("Error fetching reviews:", e);
+  }
+
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
       
-
       <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="max-w-5xl mx-auto">
-          {/* Welcome Section */}
           <div className="mb-12">
             <h2 className="text-3xl font-bold mb-4">Welcome back, Abdullah</h2>
             <div className="relative">
@@ -22,7 +55,6 @@ export default function HomeFeedPage() {
             </div>
           </div>
 
-          {/* Recommended Books */}
           <section className="mb-12">
             <h3 className="text-2xl font-bold mb-6">Recommended for you</h3>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
@@ -59,63 +91,53 @@ export default function HomeFeedPage() {
             </div>
           </section>
 
-          {/* Latest Reviews */}
           <section>
             <h3 className="text-2xl font-bold mb-6">Latest Reviews</h3>
             <div className="space-y-6">
-              {[
-                {
-                  reviewer: "Emily Carter",
-                  book: "The Secret Garden",
-                  cover: "classic garden book cover",
-                  review:
-                    "A heartwarming tale of discovery and friendship. The author's prose is enchanting, and the characters are unforgettable. A must-read for all ages.",
-                },
-                {
-                  reviewer: "Michael Evans",
-                  book: "The Lost City",
-                  cover: "adventure lost city book cover",
-                  review:
-                    "An epic adventure filled with twists and turns. The world-building is immersive, and the plot keeps you on the edge of your seat. Highly recommended!",
-                },
-                {
-                  reviewer: "Olivia Bennett",
-                  book: "The Silent Sea",
-                  cover: "mystery ocean book cover",
-                  review:
-                    "A captivating mystery with a compelling protagonist. The suspense builds gradually, leading to a satisfying conclusion. A great read for mystery lovers.",
-                },
-              ].map((review, index) => (
-                <Card
-                  key={index}
-                  className="p-6 hover:shadow-lg transition-shadow duration-300 flex flex-col md:flex-row gap-6"
-                >
-                  <img
-                    alt={`${review.book} cover`}
-                    className="w-full md:w-1/4 h-auto object-cover rounded"
-                    src={`/abstract-geometric-shapes.png?height=200&width=150&query=${review.cover}`}
-                  />
-                  <div className="flex-1">
-                    <p className="text-sm text-slate-600 dark:text-slate-400 mb-2">Review by {review.reviewer}</p>
-                    <h4 className="text-xl font-bold mb-2">{review.book}</h4>
-                    <p className="text-slate-600 dark:text-slate-400 text-sm leading-relaxed mb-4 line-clamp-3">
-                      {review.review}
-                    </p>
-                    <Link href="/book-details" className="text-blue-500 font-semibold text-sm hover:underline">
-                      Read More
+              {reviews.length === 0 ? (
+                  <p className="text-slate-500">No recent reviews yet. Be the first to post one!</p>
+              ) : (
+                reviews.map((review) => (
+                  <Card
+                    key={review.id}
+                    className="p-6 hover:shadow-lg transition-shadow duration-300 flex flex-col md:flex-row gap-6"
+                  >
+                    <Link
+                      href={`/book/${review.book.externalId}`}
+                      className="flex-shrink-0 w-full md:w-1/4 h-auto object-cover rounded" 
+                    >
+                       <ImageWithFallback
+                        alt={`${review.book.title} cover`}
+                        className="w-full h-auto object-cover rounded max-h-64"
+                        src={review.book.coverUrl || `/abstract-geometric-shapes.png?height=320&width=240&query`} 
+                        fallbackSrc="/placeholder.svg"
+                      />
                     </Link>
-                  </div>
-                </Card>
-              ))}
+
+                    <div className="flex-1">
+                      <p className="text-sm text-slate-600 dark:text-slate-400 mb-2">Review by <span className="font-semibold">{review.user.username}</span></p>
+                      
+                      <h4 className="text-xl font-bold mb-2">{review.book.title}</h4>
+                      
+                      <p className="text-slate-600 dark:text-slate-400 text-sm leading-relaxed mb-4 line-clamp-3">
+                        &quot;{review.content}&quot;
+                      </p>
+                      
+                      <Link href={`/book/${review.book.externalId}`} className="text-blue-500 font-semibold text-sm hover:underline">
+                        Read More
+                      </Link>
+                    </div>
+                  </Card>
+                ))
+              )}
             </div>
           </section>
         </div>
       </main>
 
-      {/* Footer */}
       <footer className="bg-white dark:bg-slate-800 mt-12 border-t border-slate-200 dark:border-slate-700">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 text-center text-sm text-slate-600 dark:text-slate-400">
-          <p>&copy; 2024 NovelNest. All rights reserved.</p>
+          <p>&copy; 2025 BookBoxd. All rights reserved.</p>
         </div>
       </footer>
     </div>

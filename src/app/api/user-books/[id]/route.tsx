@@ -39,6 +39,9 @@ export async function GET(
     return NextResponse.json({ status: userBook.status });
   } catch (error) {
     console.error("Error fetching book status:", error);
+    if (process.env.NODE_ENV === "development") {
+      return NextResponse.json({ status: null });
+    }
     return NextResponse.json({ error: "Failed to fetch book status" }, { status: 500 });
   }
 }

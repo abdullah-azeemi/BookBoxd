@@ -4,12 +4,19 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { Checkbox } from "@/components/ui/checkBox"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Bell, BookOpen, Star } from "lucide-react"
-
-import Link from "next/link"
+import { Star } from "lucide-react"
+import { useSearchParams, useRouter } from "next/navigation"
+import { useUser } from "@clerk/nextjs"
 
 export default function AddReviewPage() {
+  const searchParams = useSearchParams()
+  const router = useRouter()
+  const { user } = useUser()
+
+  const bookId = searchParams.get("bookId") || ""
+  const bookTitle = searchParams.get("title") || "Unknown Title"
+  const bookAuthor = searchParams.get("author") || "Unknown Author"
+
   const [review, setReview] = useState("")
   const [rating, setRating] = useState(3)
   const [selectedTags, setSelectedTags] = useState(["Contemporary", "Self-Help"])
@@ -21,21 +28,41 @@ export default function AddReviewPage() {
     setSelectedTags((prev) => (prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]))
   }
 
+  const handleSubmit = async () => {
+    if (!review.trim() || !bookId) return
+
+    const effectiveUserId = user?.id || process.env.DEV_FAKE_USER_ID || "clerk1"
+
+    const res = await fetch("/api/reviews", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        externalId: bookId,
+        title: bookTitle,
+        author: bookAuthor,
+        userId: effectiveUserId,
+        content: review,
+        rating,
+      }),
+    })
+
+    if (res.ok) {
+      router.push(`/book/${bookId}`)
+    }
+  }
+
   return (
     <div className="flex flex-col min-h-screen bg-slate-50 dark:bg-slate-900">
-
-      {/* Main Content */}
       <main className="flex-grow container mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
         <div className="max-w-2xl mx-auto">
           <div className="mb-8">
             <h2 className="text-3xl md:text-4xl font-bold tracking-tight">Write a Review</h2>
             <p className="mt-2 text-slate-600 dark:text-slate-400">
-              Share your thoughts on "The Midnight Library" by Matt Haig.
+              Share your thoughts on "{bookTitle}" by {bookAuthor}.
             </p>
           </div>
 
           <div className="space-y-8">
-            {/* Review Text */}
             <div>
               <label className="block text-sm font-medium mb-2" htmlFor="review">
                 Your Review
@@ -51,7 +78,6 @@ export default function AddReviewPage() {
               />
             </div>
 
-            {/* Rating */}
             <div>
               <h3 className="text-sm font-medium mb-3">Rating</h3>
               <div className="flex items-center space-x-2">
@@ -69,7 +95,6 @@ export default function AddReviewPage() {
               </div>
             </div>
 
-            {/* Tags */}
             <div>
               <h3 className="text-sm font-medium mb-2">Tags</h3>
               <div className="flex flex-wrap gap-2">
@@ -89,7 +114,6 @@ export default function AddReviewPage() {
               </div>
             </div>
 
-            {/* Mark as Read */}
             <div className="flex items-center space-x-3">
               <Checkbox id="mark-as-read" checked={markAsRead} onCheckedChange={setMarkAsRead} className="h-5 w-5" />
               <label htmlFor="mark-as-read" className="text-sm cursor-pointer">
@@ -97,9 +121,8 @@ export default function AddReviewPage() {
               </label>
             </div>
 
-            {/* Submit Button */}
             <div className="pt-4 flex justify-end">
-              <Button className="px-6 py-3 rounded-lg bg-blue-500 text-white font-semibold text-sm shadow-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500/50 dark:focus:ring-offset-slate-900 transition-all">
+              <Button onClick={handleSubmit} className="px-6 py-3 rounded-lg bg-blue-500 text-white font-semibold text-sm shadow-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500/50 dark:focus:ring-offset-slate-900 transition-all">
                 Submit Review
               </Button>
             </div>

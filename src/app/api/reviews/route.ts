@@ -8,6 +8,12 @@ export async function POST(req: Request) {
     if (!externalId || !title || !author || !userId || !content || !rating) {
       return NextResponse.json({ error: "Missing fields" }, { status: 400 })
     }
+    await prisma.user.upsert({
+      where: { clerkId: userId },
+      update: {},
+      create: { id: userId, clerkId: userId },
+    })
+
     const book = await prisma.book.upsert({
       where: { externalId },
       update: {}, 
@@ -43,18 +49,25 @@ export async function POST(req: Request) {
   }
 }
 export async function GET(req: Request) {
-  const { searchParams } = new URL(req.url)
-  const externalId = searchParams.get("bookId") 
-  if (!externalId) return NextResponse.json({ reviews: [] })
+  try {
+    const { searchParams } = new URL(req.url)
+    const externalId = searchParams.get("bookId") 
+    if (!externalId) return NextResponse.json({ reviews: [] })
 
-  const book = await prisma.book.findUnique({ where: { externalId } })
-  if (!book) return NextResponse.json({ reviews: [] })
+    const book = await prisma.book.findUnique({ where: { externalId } })
+    if (!book) return NextResponse.json({ reviews: [] })
 
-  const reviews = await prisma.review.findMany({
-    where: { bookId: book.id }, 
-    include: { user: true },
-    orderBy: { createdAt: "desc" },
-  })
+    const reviews = await prisma.review.findMany({
+      where: { bookId: book.id }, 
+      include: { user: true },
+      orderBy: { createdAt: "desc" },
+    })
 
-  return NextResponse.json({ reviews })
+    return NextResponse.json({ reviews })
+  } catch (err) {
+    if (process.env.NODE_ENV === "development") {
+      return NextResponse.json({ reviews: [] })
+    }
+    return NextResponse.json({ error: "Failed to fetch reviews" }, { status: 500 })
+  }
 }
