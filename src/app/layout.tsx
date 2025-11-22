@@ -61,6 +61,18 @@ export default function RootLayout({
             >
               My Books
             </Link>
+            <Link
+              href="/ai-analytics"
+              className="text-sm font-medium text-slate-600 hover:text-blue-500 dark:text-slate-300 dark:hover:text-blue-500"
+            >
+              AI Analytics
+            </Link>
+            <Link
+              href="/ai-recommender"
+              className="text-sm font-medium text-slate-600 hover:text-blue-500 dark:text-slate-300 dark:hover:text-blue-500"
+            >
+              AI Recommender
+            </Link>
           </nav>
           <div className="flex items-center gap-4">
             <SearchBar />

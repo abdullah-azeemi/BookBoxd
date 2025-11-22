@@ -22,7 +22,11 @@ interface UserProfileData {
 }
 
 async function getProfile() {
-  const res = await fetch(`/api/profile`, { cache: "no-store" })
+  const h = await headers()
+  const host = h.get("host") || process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"
+  const protocol = h.get("x-forwarded-proto") || (process.env.VERCEL ? "https" : "http")
+  const origin = host.startsWith("http") ? host : `${protocol}://${host}`
+  const res = await fetch(`${origin}/api/profile`, { cache: "no-store" })
   if (!res.ok) return null
   return res.json()
 }
@@ -177,3 +181,4 @@ export default async function ProfilePage() {
   )
 }
 export const dynamic = "force-dynamic"
+import { headers } from "next/headers"

@@ -4,7 +4,9 @@ import { auth } from "@clerk/nextjs/server";
 
 export async function GET() {
   const authObj = auth() as unknown as { userId: string | null }
-  const effectiveUserId = authObj.userId ?? process.env.DEV_FAKE_USER_ID;
+  const effectiveUserId = process.env.NODE_ENV === "development"
+    ? (authObj.userId ?? process.env.DEV_FAKE_USER_ID)
+    : (authObj.userId || null)
   if (!effectiveUserId) {
     return NextResponse.json({ error: "Not authorized" }, { status: 401 });
   }
@@ -27,7 +29,9 @@ export async function GET() {
 
 export async function POST(req: Request) {
   const authObj = auth() as unknown as { userId: string | null }
-  const effectiveUserId = authObj.userId ?? process.env.DEV_FAKE_USER_ID ;
+  const effectiveUserId = process.env.NODE_ENV === "development"
+    ? (authObj.userId ?? process.env.DEV_FAKE_USER_ID)
+    : (authObj.userId || null)
   if (!effectiveUserId) {
     return NextResponse.json({ error: "Not authorized" }, { status: 401 });
   }

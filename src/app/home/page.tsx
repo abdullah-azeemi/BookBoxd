@@ -3,6 +3,7 @@ import { Search } from "lucide-react"
 import Link from "next/link"
 import ImageWithFallback from "@/components/ui/ImageWithFallback" 
 import Image from "next/image"
+import { headers } from "next/headers"
 
 export const dynamic = "force-dynamic"
 
@@ -40,7 +41,11 @@ export default async function HomeFeedPage() {
   let fetchError: string | null = null;
 
   try {
-    const res = await fetch(`/api/review`, {
+    const h = await headers()
+    const host = h.get("host") || process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"
+    const protocol = h.get("x-forwarded-proto") || (process.env.VERCEL ? "https" : "http")
+    const origin = host.startsWith("http") ? host : `${protocol}://${host}`
+    const res = await fetch(`${origin}/api/review`, {
         cache: 'no-store' 
     });
 
