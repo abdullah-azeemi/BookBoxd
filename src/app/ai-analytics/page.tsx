@@ -78,7 +78,7 @@ export default function AIAnalyticsPage() {
             setError(null);
             
             try {
-                const aiRes = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/ai-analytics`, {
+                const aiRes = await fetch(`/api/ai-analytics`, {
                     cache: 'no-store'
                 });
                 const aiData: AIAnalyticsResponse = await aiRes.json();

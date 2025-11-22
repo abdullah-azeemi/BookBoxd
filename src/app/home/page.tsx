@@ -40,7 +40,7 @@ export default async function HomeFeedPage() {
   let fetchError: string | null = null;
 
   try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/review`, {
+    const res = await fetch(`/api/review`, {
         cache: 'no-store' 
     });
 
