@@ -3,7 +3,6 @@ import { prisma } from "@/lib/prisma";
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY || ""; 
 const GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent";
-const HARDCODED_USER_ID = "clerk1"; 
 const MAX_RECOMMENDATIONS = 5;
 
 const recommendationSchema = {
@@ -20,7 +19,7 @@ const recommendationSchema = {
     }
 };
 
-async function getReadingHistory(userId: string) {
+async function getReadingHistory() {
     return {
         lastRead: "The Lord of the Rings: The Fellowship of the Ring (Fantasy)",
         currentlyReading: "Sapiens: A Brief History of Humankind (Non-Fiction, History)",
@@ -29,9 +28,18 @@ async function getReadingHistory(userId: string) {
 }
 
 export async function GET() {
-    let reviews = [];
-    let recommendations = [];
-    let errors: string[] = [];
+    type LatestReview = {
+        id: string;
+        content: string;
+        createdAt: Date;
+        book: { externalId: string | null; title: string; author: string; coverUrl: string | null };
+        user: { username: string | null };
+    };
+    type RecommendationItem = { title: string; author: string; coverQuery: string };
+
+    let reviews: LatestReview[] = [];
+    let recommendations: RecommendationItem[] = [];
+    const errors: string[] = [];
     
     try {
         const latestReviews = await prisma.review.findMany({
@@ -53,7 +61,7 @@ export async function GET() {
         errors.push("GEMINI_API_KEY environment variable is not set.");
     } else {
         try {
-            const history = await getReadingHistory(HARDCODED_USER_ID);
+            const history = await getReadingHistory();
             
             const systemPrompt = `You are a world-class book recommendation engine. Based on the user's reading history, suggest exactly ${MAX_RECOMMENDATIONS} books that they would enjoy. Do not output any preamble, only the requested JSON array.`;
             

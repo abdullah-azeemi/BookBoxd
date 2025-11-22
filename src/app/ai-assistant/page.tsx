@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useCallback } from 'react'
+import Image from 'next/image'
 import { BookOpen, Send, Loader2, Search } from 'lucide-react'
 
 interface RecommendationData {
@@ -34,14 +35,13 @@ const RecommendationCard = ({ data }: { data: RecommendationData }) => (
     <div className="bg-white dark:bg-slate-700 shadow-xl border border-blue-200 dark:border-blue-900 rounded-xl p-4 w-full max-w-md transition-all duration-200 hover:shadow-2xl">
         <div className="flex gap-4">
             {/* Book Cover */}
-            <img 
-                src={data.coverUrl} 
+            <Image
+                src={data.coverUrl || 'https://placehold.co/80x120/E0E7FF/000000?text=No+Cover'}
                 alt={`Cover for ${data.bookTitle}`}
-                className="w-20 h-30 flex-shrink-0 object-cover rounded shadow-md border-2 border-slate-200 dark:border-slate-500"
-                onError={(e) => { 
-                    e.currentTarget.onerror = null; 
-                    e.currentTarget.src = 'https://placehold.co/80x120/E0E7FF/000000?text=No+Cover'; 
-                }}
+                width={80}
+                height={120}
+                className="flex-shrink-0 object-cover rounded shadow-md border-2 border-slate-200 dark:border-slate-500"
+                unoptimized
             />
             
             {/* Title and Author */}
@@ -68,14 +68,14 @@ export default function AdvancedSearchPage() {
     const [userInput, setUserInput] = useState('');
     const [isSending, setIsSending] = useState(false);
 
-    const truncateWords = (text: string, maxWords: number): string => {
+    const truncateWords = useCallback((text: string, maxWords: number): string => {
         if (!text) return '';
         const words = text.split(/\s+/).filter(w => w.length > 0); // Split and filter empty strings
         if (words.length <= maxWords) {
             return text;
         }
         return words.slice(0, maxWords).join(' ') + '...';
-    };
+    }, []);
 
     const extractRequestedQuantity = useCallback((query: string): number => {
         const numMatch = query.match(/(\d+)\s+books?/i);
@@ -96,7 +96,7 @@ export default function AdvancedSearchPage() {
         const url = `${openLibraryApiUrl}${encodeURIComponent(query)}&limit=${MAX_RECOMMENDATIONS}&fields=key,title,author_name,first_publish_year,cover_i,first_sentence,subject`;
         
         const MAX_RETRIES = 3;
-        let response: Response;
+        let response: Response | null = null;
 
         for (let i = 0; i < MAX_RETRIES; i++) {
             try {
@@ -107,25 +107,34 @@ export default function AdvancedSearchPage() {
                 } else {
                     throw new Error(`Failed to fetch book data after ${MAX_RETRIES} retries.`);
                 }
-            } catch (e: any) {
+            } catch (e) {
                 if (i < MAX_RETRIES - 1) {
                     await new Promise(resolve => setTimeout(resolve, Math.pow(2, i) * 1000));
                 } else {
-                    throw new Error(`Network error or data fetch failed: ${e.message}`);
+                    const message = e instanceof Error ? e.message : 'Unknown error'
+                    throw new Error(`Network error or data fetch failed: ${message}`);
                 }
             }
         }
         
-        if (!response.ok) {
-             throw new Error(`Failed to fetch book data. Status: ${response.status}`);
+        if (!response || !response.ok) {
+             throw new Error(`Failed to fetch book data. Status: ${response ? response.status : 'unknown'}`);
         }
         
         const result = await response.json();
         
         if (result.docs && result.docs.length > 0) {
             
+            type OpenLibraryDoc = {
+                cover_i?: number;
+                author_name?: string[] | string;
+                title?: string;
+                first_sentence?: string[];
+                subject?: string[];
+                first_publish_year?: number;
+            };
             const rawRecommendations: RecommendationData[] = result.docs
-                .map((doc: any): RecommendationData => {
+                .map((doc: OpenLibraryDoc): RecommendationData => {
                     const coverId = doc.cover_i;
                     const coverUrl = coverId 
                         ? `https://covers.openlibrary.org/b/id/${coverId}-M.jpg` 
@@ -212,15 +221,16 @@ export default function AdvancedSearchPage() {
                 return newMessages;
             });
 
-        } catch (error: any) {
+        } catch (error) {
+            const message = error instanceof Error ? error.message : 'An unexpected error occurred.'
             console.error("API Error:", error);
             setMessages(prev => {
                 const newMessages = prev.map(msg => 
                     msg.id === newLoadingMessageId 
                         ? {
                             id: newLoadingMessageId,
-                            type: 'ai',
-                            text: `Search failed: ${error.message || "An unexpected error occurred."}`,
+                            type: 'ai' as const,
+                            text: `Search failed: ${message}`,
                             isLoading: false
                         }
                         : msg
@@ -243,7 +253,7 @@ export default function AdvancedSearchPage() {
                  node.scrollTop = node.scrollHeight;
             }
         }
-    }, [messages]);
+    }, []);
 
 
     return (

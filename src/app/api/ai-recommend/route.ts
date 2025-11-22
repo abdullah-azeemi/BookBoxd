@@ -164,10 +164,11 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ recommendations: booksWithDetails.map(b => b.title), booksWithDetails });
 
-  } catch (err: any) {
-    console.error("AI Recommend POST error:", err);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Unknown server error"
+    console.error("AI Recommend POST error:", error);
     return NextResponse.json(
-      { recommendations: [], error: err?.message ?? "Unknown server error" },
+      { recommendations: [], error: message },
       { status: 500 }
     );
   }

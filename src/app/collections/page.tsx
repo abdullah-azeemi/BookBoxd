@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState, useEffect } from "react";
+import Image from "next/image";
 import { Card, CardContent } from "@/components/ui/card";
 import { Book } from "@prisma/client"; 
 interface UserBookWithBook {
@@ -14,7 +15,16 @@ interface UserBookWithBook {
 
 export default function CollectionsPage() {
   const [searchQuery, setSearchQuery] = useState("");
-  const [searchResults, setSearchResults] = useState<any[]>([]);
+  type SearchResult = {
+    id: string;
+    title: string;
+    authors?: string[];
+    description?: string;
+    publishedDate?: string;
+    categories?: string[];
+    coverUrl?: string | null;
+  };
+  const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
   const [loading, setLoading] = useState(false);
   
   const [readBooks, setReadBooks] = useState<UserBookWithBook[]>([]);
@@ -78,9 +88,11 @@ export default function CollectionsPage() {
           className="flex-shrink-0 w-40 space-y-2 cursor-pointer hover:scale-105 transition-transform"
         >
           <div>
-            <img
+            <Image
               alt={userBook.book.title}
               src={userBook.book.coverUrl || "/placeholder.svg"}
+              width={160}
+              height={240}
               className="w-full aspect-[2/3] object-cover rounded-lg shadow-lg hover:shadow-xl transition-shadow"
             />
             <h3 className="font-semibold truncate text-sm mt-1">{userBook.book.title}</h3>
@@ -133,13 +145,15 @@ export default function CollectionsPage() {
                     className="flex-shrink-0 w-40 space-y-2 cursor-pointer hover:scale-105 transition-transform"
                   >
                     <div>
-                      <img
+                      <Image
                         alt={book.title}
-                        src={book.coverUrl || book.cover || "/placeholder.svg"}
+                        src={book.coverUrl || "/placeholder.svg"}
+                        width={160}
+                        height={240}
                         className="w-full aspect-[2/3] object-cover rounded-lg shadow-lg hover:shadow-xl transition-shadow"
                       />
                       <h3 className="font-semibold truncate text-sm mt-1">{book.title}</h3>
-                      {book.authors?.length > 0 && (
+                      {Array.isArray(book.authors) && book.authors.length > 0 && (
                         <p className="text-xs text-slate-500">{book.authors.join(", ")}</p>
                       )}
                     </div>
@@ -163,9 +177,11 @@ export default function CollectionsPage() {
                     Based on your reading history and preferences
                   </p>
                 </div>
-                <img
+                <Image
                   alt="Top Picks"
                   src="/top-picks-books-collection.jpg"
+                  width={128}
+                  height={80}
                   className="w-32 h-20 object-cover rounded-lg"
                 />
               </CardContent>
@@ -179,9 +195,11 @@ export default function CollectionsPage() {
                     Stay up-to-date with the latest books
                   </p>
                 </div>
-                <img
+                <Image
                   alt="New Releases"
                   src="/new-releases-books-collection.jpg"
+                  width={128}
+                  height={80}
                   className="w-32 h-20 object-cover rounded-lg"
                 />
               </CardContent>
@@ -195,9 +213,11 @@ export default function CollectionsPage() {
                     Discover lesser-known books that match your taste
                   </p>
                 </div>
-                <img
+                <Image
                   alt="Hidden Gems"
                   src="/placeholder.svg?height=80&width=128"
+                  width={128}
+                  height={80}
                   className="w-32 h-20 object-cover rounded-lg"
                 />
               </CardContent>

@@ -2,6 +2,9 @@ import { Card } from "@/components/ui/card"
 import { Search } from "lucide-react"
 import Link from "next/link"
 import ImageWithFallback from "@/components/ui/ImageWithFallback" 
+import Image from "next/image"
+
+export const dynamic = "force-dynamic"
 
 interface Recommendation {
     title: string;
@@ -99,10 +102,11 @@ export default async function HomeFeedPage() {
                     <div key={index} className="group cursor-pointer">
                       {/* Recommendations use a standard 3/4 aspect ratio */}
                       <div className="aspect-[3/4] mb-3 overflow-hidden">
-                        <img
+                        <Image
                           alt={`${book.title} cover`}
                           className="w-full h-full object-cover rounded-lg shadow-md group-hover:shadow-xl group-hover:scale-[1.02] transition-all duration-300"
-                        
+                          width={240}
+                          height={320}
                           src={`/abstract-geometric-shapes.png?height=320&width=240&query=${encodeURIComponent(book.coverQuery)}`}
                         />
                       </div>
@@ -136,6 +140,8 @@ export default async function HomeFeedPage() {
                         className="w-full h-full object-contain rounded" 
                         src={review.book.coverUrl || `/abstract-geometric-shapes.png?height=320&width=240&query`} 
                         fallbackSrc="/placeholder.svg"
+                        width={128}
+                        height={160}
                       />
                     </Link>
 

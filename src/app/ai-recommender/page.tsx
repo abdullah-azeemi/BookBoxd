@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 
 interface Book {
   title: string;
@@ -93,10 +94,13 @@ export default function AIRecommenderPage() {
                   <div key={book.title} className="group book-card">
                     <div className="w-full overflow-hidden rounded-lg aspect-[2/3] bg-slate-200 dark:bg-slate-800">
                       {book.cover && book.cover !== "/placeholder.svg" ? (
-                        <img
+                        <Image
                           src={book.cover}
                           alt={`Cover for ${book.title}`}
+                          width={240}
+                          height={360}
                           className="w-full h-full object-cover group-hover:opacity-75"
+                          unoptimized
                         />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center p-2 text-center">

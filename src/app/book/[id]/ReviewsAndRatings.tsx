@@ -21,12 +21,8 @@ interface ReviewsAndRatingsProps {
 
 export default function ReviewsAndRatings({ bookId, bookTitle, bookAuthor }: ReviewsAndRatingsProps) {
   const [reviews, setReviews] = useState<Review[]>([])
-  const [newReview, setNewReview] = useState("")
-  const [newRating, setNewRating] = useState(5)
-  const userId = "user1" // replace with actual logged-in user id
+  
 
-  const [averageRating, setAverageRating] = useState(0);
-  const [ratingCount, setRatingCount] = useState(0);
 
   
 
@@ -36,39 +32,9 @@ export default function ReviewsAndRatings({ bookId, bookTitle, bookAuthor }: Rev
     .then(res => res.json())
     .then(data => setReviews(data.reviews || []));
 
-    // Fetch rating summary
-  fetch(`/api/ratings?bookId=${bookId}`)
-    .then(res => res.json())
-    .then(data => {
-      setAverageRating(data.average || 0);
-      setRatingCount(data.count || 0);
-    });
 }, [bookId]);
 
-  const submitReview = async () => {
-    if (!newReview) return
-
-    await fetch("/api/reviews", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        externalId: bookId,
-        title: bookTitle,
-        author: bookAuthor,
-        userId,
-        content: newReview,
-        rating: newRating,
-      }),
-    })
-
-    setNewReview("")
-    setNewRating(5)
-
-    // Refresh reviews
-    const reviewsRes = await fetch(`/api/reviews?bookId=${bookId}`)
-    const reviewsData = await reviewsRes.json()
-    setReviews(reviewsData.reviews || [])
-  }
+  
 
   // Placeholder array to maintain 2-3 empty boxes if no reviews
   const displayReviews = reviews.length ? reviews : Array(3).fill(null)

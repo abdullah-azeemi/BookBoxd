@@ -3,8 +3,8 @@ import { prisma } from "@/lib/prisma";
 import { auth } from "@clerk/nextjs/server";
 
 export async function GET() {
-  const { userId } = auth();
-  const effectiveUserId = userId ?? process.env.DEV_FAKE_USER_ID;
+  const authObj = auth() as unknown as { userId: string | null }
+  const effectiveUserId = authObj.userId ?? process.env.DEV_FAKE_USER_ID;
   if (!effectiveUserId) {
     return NextResponse.json({ error: "Not authorized" }, { status: 401 });
   }
@@ -26,8 +26,8 @@ export async function GET() {
 }
 
 export async function POST(req: Request) {
-  const { userId } = auth();
-  const effectiveUserId = userId ?? process.env.DEV_FAKE_USER_ID ;
+  const authObj = auth() as unknown as { userId: string | null }
+  const effectiveUserId = authObj.userId ?? process.env.DEV_FAKE_USER_ID ;
   if (!effectiveUserId) {
     return NextResponse.json({ error: "Not authorized" }, { status: 401 });
   }

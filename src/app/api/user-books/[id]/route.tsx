@@ -2,17 +2,15 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@clerk/nextjs/server";
 
-export async function GET(
-  req: Request,
-  { params }: { params: { externalId: string } }
-) {
-  const { userId } = auth();
-  const effectiveUserId = userId ?? process.env.DEV_FAKE_USER_ID;
+export async function GET(req: Request, context: unknown) {
+  const { params } = context as { params: { id: string } }
+  const authObj = auth() as unknown as { userId: string | null }
+  const effectiveUserId = authObj.userId ?? process.env.DEV_FAKE_USER_ID;
   if (!effectiveUserId) {
     return NextResponse.json({ error: "Not authorized" }, { status: 401 });
   }
 
-  const { externalId } = params;
+  const externalId = params.id;
 
   try {
     const book = await prisma.book.findUnique({

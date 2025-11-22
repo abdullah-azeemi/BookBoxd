@@ -68,7 +68,7 @@ export default function HomePage() {
                 </div>
                 <h3 className="mt-6 text-xl font-bold text-slate-900 dark:text-white">3. Share Your Thoughts</h3>
                 <p className="mt-2 text-base text-slate-600 dark:text-slate-400">
-                  Write your own reviews, rate books you've read, and contribute to our growing community.
+                  Write your own reviews, rate books you&apos;ve read, and contribute to our growing community.
                 </p>
               </div>
             </div>
@@ -150,7 +150,7 @@ export default function HomePage() {
                 What Our Users Say
               </h2>
               <p className="mx-auto mt-4 max-w-2xl text-lg text-slate-600 dark:text-slate-400">
-                We're trusted by book lovers everywhere. Here's a selection of testimonials from our community.
+                We&apos;re trusted by book lovers everywhere. Here&apos;s a selection of testimonials from our community.
               </p>
             </div>
             <div className="mt-12 grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
@@ -162,8 +162,8 @@ export default function HomePage() {
                   </Avatar>
                   <div>
                     <p className="text-base italic text-slate-600 dark:text-slate-400">
-                      "BookWise has completely transformed my reading habits. The recommendations are spot-on, and the
-                      community is so welcoming. It's the best platform for any book enthusiast!"
+                      &quot;BookWise has completely transformed my reading habits. The recommendations are spot-on, and the
+                      community is so welcoming. It&apos;s the best platform for any book enthusiast!&quot;
                     </p>
                     <div className="mt-4 font-bold text-slate-900 dark:text-white">Sarah J.</div>
                     <div className="text-sm text-slate-500 dark:text-slate-400">Avid Reader</div>
@@ -178,8 +178,8 @@ export default function HomePage() {
                   </Avatar>
                   <div>
                     <p className="text-base italic text-slate-600 dark:text-slate-400">
-                      "I've discovered so many hidden gems thanks to BookWise. The detailed reviews and the ability to
-                      track my reading progress are features I can't live without now."
+                      &quot;I&apos;ve discovered so many hidden gems thanks to BookWise. The detailed reviews and the ability to
+                      track my reading progress are features I can&apos;t live without now.&quot;
                     </p>
                     <div className="mt-4 font-bold text-slate-900 dark:text-white">Michael K.</div>
                     <div className="text-sm text-slate-500 dark:text-slate-400">Book Club Organizer</div>
@@ -194,8 +194,8 @@ export default function HomePage() {
                   </Avatar>
                   <div>
                     <p className="text-base italic text-slate-600 dark:text-slate-400">
-                      "As an author, it's inspiring to see such a vibrant community of readers. BookWise is a fantastic
-                      place to connect with people who are passionate about literature."
+                      &quot;As an author, it&apos;s inspiring to see such a vibrant community of readers. BookWise is a fantastic
+                      place to connect with people who are passionate about literature.&quot;
                     </p>
                     <div className="mt-4 font-bold text-slate-900 dark:text-white">Emily R.</div>
                     <div className="text-sm text-slate-500 dark:text-slate-400">Fantasy Author</div>

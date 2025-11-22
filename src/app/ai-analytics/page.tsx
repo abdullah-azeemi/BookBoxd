@@ -1,6 +1,5 @@
 'use client';
 
-import Link from "next/link"
 import { useState, useEffect, useMemo, useCallback } from "react"
 import { Loader2 } from "lucide-react"
 
@@ -92,9 +91,10 @@ export default function AIAnalyticsPage() {
 
                 setData({ ...aiData, ...statsData });
 
-            } catch (err: any) {
+            } catch (err) {
                 console.error("Dashboard Fetch Error:", err);
-                setError(err.message || "Failed to load dashboard data.");
+                const message = err instanceof Error ? err.message : "Failed to load dashboard data."
+                setError(message);
                 setData(INITIAL_STATE);
             } finally {
                 setLoading(false);

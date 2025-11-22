@@ -11,7 +11,7 @@ export async function GET(req: Request) {
     const average = ratings.length ? ratings.reduce((sum, r) => sum + r.value, 0) / ratings.length : 0
 
     return NextResponse.json({ average, count: ratings.length })
-  } catch (err) {
+  } catch {
     if (process.env.NODE_ENV === "development") {
       return NextResponse.json({ average: 0, count: 0 })
     }

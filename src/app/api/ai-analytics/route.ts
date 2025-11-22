@@ -43,8 +43,8 @@ export async function GET() {
   if (process.env.NODE_ENV === "development") {
     effectiveUserId = process.env.DEV_FAKE_USER_ID || "clerk1"
   } else {
-    const { userId } = auth()
-    effectiveUserId = userId || null
+    const authObj = auth() as unknown as { userId: string | null }
+    effectiveUserId = authObj.userId || null
   }
 
   if (!effectiveUserId) {
@@ -134,11 +134,11 @@ export async function GET() {
       },
     }
 
-    const response = await fetchWithBackoff(apiUrl, {
+    const response = (await fetchWithBackoff(apiUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
-    })
+    })) as Response
     
     const result = await response.json()
     const candidate = result.candidates?.[0]

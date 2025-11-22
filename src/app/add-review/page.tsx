@@ -58,7 +58,7 @@ export default function AddReviewPage() {
           <div className="mb-8">
             <h2 className="text-3xl md:text-4xl font-bold tracking-tight">Write a Review</h2>
             <p className="mt-2 text-slate-600 dark:text-slate-400">
-              Share your thoughts on "{bookTitle}" by {bookAuthor}.
+              Share your thoughts on &quot;{bookTitle}&quot; by {bookAuthor}.
             </p>
           </div>
 
@@ -115,7 +115,12 @@ export default function AddReviewPage() {
             </div>
 
             <div className="flex items-center space-x-3">
-              <Checkbox id="mark-as-read" checked={markAsRead} onCheckedChange={setMarkAsRead} className="h-5 w-5" />
+              <Checkbox
+                id="mark-as-read"
+                checked={markAsRead}
+                onCheckedChange={(checked) => setMarkAsRead(checked === true)}
+                className="h-5 w-5"
+              />
               <label htmlFor="mark-as-read" className="text-sm cursor-pointer">
                 I have finished reading this book
               </label>

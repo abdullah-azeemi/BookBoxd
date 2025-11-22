@@ -1,40 +1,53 @@
 'use client';
 
-import React, { ImgHTMLAttributes } from 'react';
+import React, { useEffect, useState } from 'react';
+import Image from 'next/image';
 
-// Define props by extending standard HTML <img> attributes
-interface ImageWithFallbackProps extends ImgHTMLAttributes<HTMLImageElement> {
-    fallbackSrc?: string;
-    alt: string; 
+interface ImageWithFallbackProps {
+  src: string;
+  alt: string;
+  fallbackSrc?: string;
+  width: number;
+  height: number;
+  className?: string;
+  priority?: boolean;
 }
 
-/**
- * ImageWithFallback is a Client Component that allows an onError event handler.
- * It attempts to load the primary image source, and if it fails, it falls back
- * to a specified placeholder image.
- */
-export default function ImageWithFallback({ 
-    src, 
-    fallbackSrc = '/placeholder.svg', // Default fallback image path
-    alt, 
-    ...props 
+export default function ImageWithFallback({
+  src,
+  alt,
+  fallbackSrc = '/placeholder.svg',
+  width,
+  height,
+  className,
+  priority,
 }: ImageWithFallbackProps) {
-  
-  const handleError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
-    // If the image fails to load, set the source to the fallback image.
-    // Setting onError to null prevents an infinite loop if the fallback also fails.
-    e.currentTarget.onerror = null; 
-    e.currentTarget.src = fallbackSrc;
-  };
+  const [resolvedSrc, setResolvedSrc] = useState<string>(src);
+
+  useEffect(() => {
+    let cancelled = false;
+    const tester = new window.Image();
+    tester.src = src;
+    tester.onload = () => {
+      if (!cancelled) setResolvedSrc(src);
+    };
+    tester.onerror = () => {
+      if (!cancelled) setResolvedSrc(fallbackSrc);
+    };
+    return () => {
+      cancelled = true;
+    };
+  }, [src, fallbackSrc]);
 
   return (
-    <img
-      src={src}
+    <Image
+      src={resolvedSrc}
       alt={alt}
-      // Pass the event handler here, which is allowed because this is a client component
-      onError={handleError}
-      // Spread any other props (className, width, height, etc.)
-      {...props}
+      width={width}
+      height={height}
+      className={className}
+      priority={priority}
+      unoptimized
     />
   );
 }

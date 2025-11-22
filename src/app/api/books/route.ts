@@ -59,8 +59,20 @@ export async function GET(req: Request) {
 
     const data = await res.json();
 
-    const books = (data.items ?? []).map((item: any) => {
-      const volume = item.volumeInfo;
+    type GoogleBookItem = {
+      id: string;
+      volumeInfo: {
+        title?: string;
+        authors?: string[];
+        description?: string;
+        publishedDate?: string;
+        categories?: string[];
+        imageLinks?: { thumbnail?: string };
+      };
+    };
+
+    const books = (data.items ?? []).map((item: GoogleBookItem) => {
+      const volume = item.volumeInfo || {};
       return {
         id: item.id,
         title: volume.title,

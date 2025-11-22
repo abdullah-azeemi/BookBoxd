@@ -49,8 +49,12 @@ export async function GET() {
     if (process.env.NODE_ENV === "development") {
       effectiveUserId = process.env.DEV_FAKE_USER_ID || "clerk1"
     } else {
-      const { userId } = auth()
-      effectiveUserId = userId || null
+      const authObj = auth() as unknown as { userId: string | null }
+      effectiveUserId = authObj.userId || null
+    }
+
+    if (!effectiveUserId) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
     const user = await prisma.user.upsert({
@@ -159,7 +163,7 @@ export async function GET() {
     }
 
     return NextResponse.json(data)
-  } catch (err) {
+  } catch (error) {
     if (process.env.NODE_ENV === "development") {
       const empty: UserProfileData = {
         user: {
@@ -179,8 +183,10 @@ export async function GET() {
         },
         reviews: [],
       }
+      console.error("Profile GET error (dev returning empty):", error)
       return NextResponse.json(empty)
     }
+    console.error("Profile GET error:", error)
     return NextResponse.json({ error: "Failed to load profile" }, { status: 500 })
   }
 }
