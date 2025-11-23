@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useAuth } from "@clerk/nextjs";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -27,16 +28,21 @@ export default function BookStatusButton({
   coverUrl,
 }: BookStatusButtonProps) {
   const [status, setStatus] = useState<BookStatus | null | "loading">("loading");
+  const { isSignedIn } = useAuth();
 
   useEffect(() => {
     const fetchStatus = async () => {
       try {
-        const res = await fetch(`/api/user-books/${externalBookId}`);
+        if (!isSignedIn) {
+          setStatus(null);
+          return;
+        }
+        const res = await fetch(`/api/user-books/${externalBookId}`, { credentials: "include" });
         if (res.ok) {
           const data = await res.json();
-          setStatus(data.status || null); 
+          setStatus(data.status || null);
         } else {
-          setStatus(null); 
+          setStatus(null);
         }
       } catch (error) {
         console.error("Failed to fetch book status", error);
@@ -44,15 +50,19 @@ export default function BookStatusButton({
       }
     };
     fetchStatus();
-  }, [externalBookId]);
+  }, [externalBookId, isSignedIn]);
 
   const handleStatusChange = async (newStatus: BookStatus) => {
     const originalStatus = status;
     setStatus("loading"); 
     try {
+      if (!isSignedIn) {
+        throw new Error("Not signed in");
+      }
       const res = await fetch("/api/user-books", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({
           externalBookId,
           status: newStatus,
