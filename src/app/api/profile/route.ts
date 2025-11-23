@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
-import { auth } from "@clerk/nextjs/server"
+import { auth, currentUser } from "@clerk/nextjs/server"
 
 interface Book {
   id: string
@@ -57,11 +57,22 @@ export async function GET() {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    const user = await prisma.user.upsert({
+    let user = await prisma.user.upsert({
       where: { clerkId: effectiveUserId },
       update: {},
       create: { id: effectiveUserId, clerkId: effectiveUserId },
     })
+
+    if (!user.username) {
+      const cu = await currentUser()
+      const preferredName = `${cu?.firstName || ""} ${cu?.lastName || ""}`.trim() || cu?.username || undefined
+      if (preferredName) {
+        user = await prisma.user.update({
+          where: { clerkId: effectiveUserId },
+          data: { username: preferredName },
+        })
+      }
+    }
 
     const userBooks = await prisma.userBook.findMany({
       where: { userId: user.id },

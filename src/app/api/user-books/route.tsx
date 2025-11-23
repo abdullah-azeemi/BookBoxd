@@ -49,18 +49,19 @@ export async function POST(req: Request) {
       update: {},
       create: { id: effectiveUserId, clerkId: effectiveUserId }
     });
+    const safeCover = (coverUrl || "/placeholder.svg").replace("http://", "https://")
     const book = await prisma.book.upsert({
       where: { externalId: externalBookId },
       update: {
         title,
         author,
-        coverUrl,
+        coverUrl: safeCover,
       },
       create: {
         externalId: externalBookId,
         title: title || "Unknown Title",
         author: author || "Unknown Author",
-        coverUrl: coverUrl || "/placeholder.svg",
+        coverUrl: safeCover,
       },
     });
 

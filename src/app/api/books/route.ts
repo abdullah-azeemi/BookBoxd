@@ -8,9 +8,11 @@ export async function GET(req: Request) {
   // fetch book by id
   if (id) {
     try {
-      const res = await fetch(
-        `https://www.googleapis.com/books/v1/volumes/${encodeURIComponent(id)}?key=${process.env.GOOGLE_BOOKS_KEY}`
-      );
+      const key = process.env.GOOGLE_BOOKS_KEY
+      const url = key
+        ? `https://www.googleapis.com/books/v1/volumes/${encodeURIComponent(id)}?key=${key}`
+        : `https://www.googleapis.com/books/v1/volumes/${encodeURIComponent(id)}`
+      const res = await fetch(url);
 
       if (!res.ok) {
         return NextResponse.json(
@@ -29,7 +31,7 @@ export async function GET(req: Request) {
         description: volume.description || "",
         publishedDate: volume.publishedDate || "",
         categories: volume.categories || [],
-        coverUrl: volume.imageLinks?.thumbnail || null,
+        coverUrl: (volume.imageLinks?.thumbnail || null)?.replace("http://", "https://") || null,
       };
 
       return NextResponse.json({ book });
@@ -44,11 +46,11 @@ export async function GET(req: Request) {
     return NextResponse.json({ error: "Missing query" }, { status: 400 });
 
   try {
-    const res = await fetch(
-      `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(
-        q
-      )}&key=${process.env.GOOGLE_BOOKS_KEY}`
-    );
+    const key = process.env.GOOGLE_BOOKS_KEY
+    const url = key
+      ? `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(q)}&key=${key}`
+      : `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(q)}`
+    const res = await fetch(url);
 
     if (!res.ok) {
       return NextResponse.json(
@@ -80,7 +82,7 @@ export async function GET(req: Request) {
         description: volume.description || "",
         publishedDate: volume.publishedDate || "",
         categories: volume.categories || [],
-        coverUrl: volume.imageLinks?.thumbnail || null,
+        coverUrl: (volume.imageLinks?.thumbnail || null)?.replace("http://", "https://") || null,
       };
     });
 
