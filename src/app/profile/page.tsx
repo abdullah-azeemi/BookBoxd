@@ -2,8 +2,9 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { BookOpen } from "lucide-react"
+import { BookOpen, Settings } from "lucide-react"
 import Image from "next/image"
+import { headers } from "next/headers"
 
 interface Book {
   id: string
@@ -38,141 +39,181 @@ export default async function ProfilePage() {
   const user = data?.user || { username: "Anonymous", avatarUrl: "/placeholder-user.jpg", joiningDate: new Date().toISOString(), tagLine: "" }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-white dark:bg-slate-900">
 
       {/* Main Content */}
-      <main className="px-4 md:px-10 lg:px-20 xl:px-40 py-10">
-        <div className="max-w-4xl mx-auto">
+      <main className="px-4 md:px-8 lg:px-16 xl:px-32 py-8">
+        <div className="max-w-6xl mx-auto">
+
           {/* Profile Header */}
-          <div className="flex flex-col items-center gap-6 text-center mb-10">
-            <Avatar className="h-32 w-32">
-              <AvatarImage src={user.avatarUrl} />
-              <AvatarFallback>{(user.username || "A")[0]}</AvatarFallback>
+          <div className="flex flex-col md:flex-row items-start md:items-center gap-6 mb-10">
+            <Avatar className="h-24 w-24 md:h-28 md:w-28">
+              <AvatarImage src={user.avatarUrl} className="object-cover" />
+              <AvatarFallback className="text-4xl font-bold bg-slate-100">{(user.username || "A")[0]}</AvatarFallback>
             </Avatar>
-            <div className="flex flex-col items-center gap-1">
-              <h1 className="text-3xl font-bold">{user.username}</h1>
-              <p className="text-muted-foreground">{user.tagLine}</p>
-              <p className="text-sm text-muted-foreground">Joined {new Date(user.joiningDate).getFullYear()}</p>
+
+            <div className="flex-grow">
+              <h1 className="text-2xl md:text-3xl font-bold text-slate-900 dark:text-white mb-1">{user.username}</h1>
+              <p className="text-sm text-slate-600 dark:text-slate-400 mb-1">{user.tagLine || "Avid reader and book reviewer"}</p>
+              <p className="text-xs text-slate-500">Joined in {new Date(user.joiningDate).getFullYear()}</p>
             </div>
-            <Button variant="outline" className="bg-primary/10 text-primary hover:bg-primary/20">
-              Edit Profile
-            </Button>
+
+            <div className="flex items-center gap-2">
+              <Button className="bg-[#00A8FF] hover:bg-[#0090D9] text-white px-5 py-2 text-sm rounded-lg">
+                Edit Profile
+              </Button>
+              <Button variant="ghost" size="icon" className="rounded-lg h-9 w-9">
+                <Settings className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
 
-          {/* Tabs Navigation */}
+          {/* Stats Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+            <Card className="bg-[#E8F4F9] dark:bg-slate-800 border-none">
+              <CardContent className="p-5">
+                <p className="text-xs text-slate-600 dark:text-slate-400 mb-1">Total Books Read</p>
+                <p className="text-3xl font-bold text-slate-900 dark:text-white">{stats.totalBooksRead}</p>
+              </CardContent>
+            </Card>
+            <Card className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+              <CardContent className="p-5">
+                <p className="text-xs text-slate-600 dark:text-slate-400 mb-1">Favorite Genre</p>
+                <p className="text-xl font-bold text-slate-900 dark:text-white">{stats.favoriteGenre}</p>
+              </CardContent>
+            </Card>
+            <Card className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+              <CardContent className="p-5">
+                <p className="text-xs text-slate-600 dark:text-slate-400 mb-1">Average Rating</p>
+                <p className="text-3xl font-bold text-slate-900 dark:text-white">{stats.averageRating.toFixed(1)}</p>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Tabs */}
           <Tabs defaultValue="bookshelf" className="w-full">
-            <TabsList className="grid w-full grid-cols-3 mb-8">
-              <TabsTrigger value="bookshelf">Bookshelf</TabsTrigger>
-              <TabsTrigger value="reviews">Reviews</TabsTrigger>
-              <TabsTrigger value="stats">Stats</TabsTrigger>
+            <TabsList className="w-full justify-start bg-transparent border-b border-slate-200 dark:border-slate-700 p-0 mb-6 rounded-none h-auto">
+              <TabsTrigger
+                value="bookshelf"
+                className="px-5 py-2.5 text-sm rounded-none border-b-2 border-transparent data-[state=active]:border-[#00A8FF] data-[state=active]:text-[#00A8FF] data-[state=active]:bg-transparent text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white transition-colors font-medium"
+              >
+                Bookshelf
+              </TabsTrigger>
+              <TabsTrigger
+                value="reviews"
+                className="px-5 py-2.5 text-sm rounded-none border-b-2 border-transparent data-[state=active]:border-[#00A8FF] data-[state=active]:text-[#00A8FF] data-[state=active]:bg-transparent text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white transition-colors font-medium"
+              >
+                Reviews
+              </TabsTrigger>
             </TabsList>
 
-            <TabsContent value="bookshelf" className="space-y-8">
-              {/* Bookshelf Section */}
-              <section>
-                <h2 className="text-2xl font-bold mb-6">Bookshelf</h2>
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-                  {bookshelf.read.concat(bookshelf.currentlyReading).concat(bookshelf.wantToRead).map((b, index) => (
-                    <div key={`${b.id}-${index}`} className="aspect-[3/4] rounded-lg overflow-hidden">
-                      <Image
-                        src={b.coverUrl || "/placeholder.svg"}
-                        alt={b.title}
-                        width={300}
-                        height={400}
-                        className="w-full h-full object-cover hover:scale-105 transition-transform cursor-pointer"
-                      />
-                    </div>
-                  ))}
-                </div>
-              </section>
+            <TabsContent value="bookshelf" className="space-y-10">
 
-              {/* Reading Stats */}
-              <section>
-                <h2 className="text-2xl font-bold mb-6">Reading Stats</h2>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                  <Card>
-                    <CardContent className="p-6">
-                      <div className="flex flex-col gap-2">
-                        <p className="text-base font-medium text-muted-foreground">Total Books Read</p>
-                        <p className="text-4xl font-bold">{stats.totalBooksRead}</p>
+              {/* Currently Reading */}
+              {bookshelf.currentlyReading.length > 0 && (
+                <section>
+                  <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-5">Currently Reading</h2>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+                    {bookshelf.currentlyReading.map((b, index) => (
+                      <div key={`${b.id}-${index}`} className="group">
+                        <Card className="overflow-hidden border border-slate-100 dark:border-slate-800 shadow-sm hover:shadow-md transition-shadow">
+                          <div className="aspect-[2/3] relative">
+                            <Image
+                              src={b.coverUrl || "/placeholder.svg"}
+                              alt={b.title}
+                              fill
+                              className="object-cover"
+                            />
+                          </div>
+                        </Card>
+                        <h3 className="mt-2 font-medium text-xs text-slate-900 dark:text-white line-clamp-2">{b.title}</h3>
+                        <p className="text-xs text-slate-500 dark:text-slate-400">by {b.author}</p>
                       </div>
-                    </CardContent>
-                  </Card>
-                  <Card>
-                    <CardContent className="p-6">
-                      <div className="flex flex-col gap-2">
-                        <p className="text-base font-medium text-muted-foreground">Favorite Genre</p>
-                        <p className="text-4xl font-bold">{stats.favoriteGenre}</p>
+                    ))}
+                  </div>
+                </section>
+              )}
+
+              {/* Read */}
+              {bookshelf.read.length > 0 && (
+                <section>
+                  <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-5">Read</h2>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+                    {bookshelf.read.map((b, index) => (
+                      <div key={`${b.id}-${index}`} className="group">
+                        <Card className="overflow-hidden border border-slate-100 dark:border-slate-800 shadow-sm hover:shadow-md transition-shadow">
+                          <div className="aspect-[2/3] relative bg-slate-100 dark:bg-slate-800">
+                            <Image
+                              src={b.coverUrl || "/placeholder.svg"}
+                              alt={b.title}
+                              fill
+                              className="object-cover"
+                            />
+                          </div>
+                        </Card>
+                        <h3 className="mt-2 font-medium text-xs text-slate-900 dark:text-white line-clamp-2">{b.title}</h3>
+                        <p className="text-xs text-slate-500 dark:text-slate-400">by {b.author}</p>
                       </div>
-                    </CardContent>
-                  </Card>
-                  <Card>
-                    <CardContent className="p-6">
-                      <div className="flex flex-col gap-2">
-                        <p className="text-base font-medium text-muted-foreground">Average Rating</p>
-                        <p className="text-4xl font-bold">{stats.averageRating.toFixed(2)}</p>
+                    ))}
+                  </div>
+                </section>
+              )}
+
+              {/* Want to Read */}
+              {bookshelf.wantToRead.length > 0 && (
+                <section>
+                  <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-5">Want to Read</h2>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+                    {bookshelf.wantToRead.map((b, index) => (
+                      <div key={`${b.id}-${index}`} className="group">
+                        <Card className="overflow-hidden border border-slate-100 dark:border-slate-800 shadow-sm hover:shadow-md transition-shadow">
+                          <div className="aspect-[2/3] relative bg-slate-100 dark:bg-slate-800">
+                            <Image
+                              src={b.coverUrl || "/placeholder.svg"}
+                              alt={b.title}
+                              fill
+                              className="object-cover"
+                            />
+                          </div>
+                        </Card>
+                        <h3 className="mt-2 font-medium text-xs text-slate-900 dark:text-white line-clamp-2">{b.title}</h3>
+                        <p className="text-xs text-slate-500 dark:text-slate-400">by {b.author}</p>
                       </div>
-                    </CardContent>
-                  </Card>
-                </div>
-              </section>
+                    ))}
+                  </div>
+                </section>
+              )}
             </TabsContent>
 
-            <TabsContent value="reviews" className="space-y-6">
-              <h2 className="text-2xl font-bold">Reviews</h2>
+            <TabsContent value="reviews" className="space-y-4">
+              <h2 className="text-xl font-bold mb-5 text-slate-900 dark:text-white">My Reviews</h2>
               {(!data || !data.reviews || data.reviews.length === 0) ? (
-                <div className="text-center py-12 text-muted-foreground">
-                  <BookOpen className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                  <p>No reviews yet. Start reading and share your thoughts!</p>
+                <div className="text-center py-16 bg-slate-50 dark:bg-slate-800/50 rounded-xl">
+                  <BookOpen className="h-12 w-12 mx-auto mb-4 text-slate-300 dark:text-slate-600" />
+                  <p className="text-slate-500 dark:text-slate-400">No reviews yet. Start reading and share your thoughts!</p>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 gap-4">
+                <div className="grid grid-cols-1 gap-3">
                   {data.reviews.map((r) => (
-                    <Card key={r.id}>
-                      <CardContent className="p-6">
-                        <div className="flex items-center justify-between">
-                          <div className="font-semibold">{r.bookTitle}</div>
-                          <div className="text-sm">{r.rating} / 5</div>
+                    <Card key={r.id} className="border border-slate-200 dark:border-slate-700">
+                      <CardContent className="p-4">
+                        <div className="flex items-start justify-between mb-3">
+                          <div>
+                            <h3 className="font-bold text-base text-slate-900 dark:text-white">{r.bookTitle}</h3>
+                            <div className="flex items-center gap-1 mt-1">
+                              <span className="text-yellow-400">★</span>
+                              <span className="font-medium">{r.rating}</span>
+                              <span className="text-slate-400">/5</span>
+                            </div>
+                          </div>
+                          <span className="text-sm text-slate-400">{new Date(r.createdAt).toLocaleDateString()}</span>
                         </div>
-                        <p className="mt-2 text-sm text-muted-foreground">{r.content}</p>
+                        <p className="text-slate-600 dark:text-slate-300 leading-relaxed">{r.content}</p>
                       </CardContent>
                     </Card>
                   ))}
                 </div>
               )}
-            </TabsContent>
-
-            <TabsContent value="stats" className="space-y-6">
-              <h2 className="text-2xl font-bold">Detailed Stats</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <Card>
-                  <CardContent className="p-6">
-                    <h3 className="font-semibold mb-4">Reading Progress This Year</h3>
-                    <div className="space-y-2">
-                      <div className="flex justify-between text-sm">
-                        <span>Books Read</span>
-                        <span>{stats.currentYearProgress} / {stats.currentYearGoal}</span>
-                      </div>
-                      <div className="w-full bg-secondary rounded-full h-2">
-                        <div className="bg-primary h-2 rounded-full" style={{ width: `${Math.min(100, Math.round((stats.currentYearProgress / Math.max(1, stats.currentYearGoal)) * 100))}%` }}></div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-                <Card>
-                  <CardContent className="p-6">
-                    <h3 className="font-semibold mb-4">Top Genres</h3>
-                    <div className="space-y-3">
-                      {stats.genreBreakdown.slice(0, 5).map((g: { genre: string; count: number }) => (
-                        <div key={g.genre} className="flex justify-between">
-                          <span className="text-sm">{g.genre}</span>
-                          <span className="text-sm font-medium">{g.count} books</span>
-                        </div>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
             </TabsContent>
           </Tabs>
         </div>
@@ -180,5 +221,5 @@ export default async function ProfilePage() {
     </div>
   )
 }
+
 export const dynamic = "force-dynamic"
-import { headers } from "next/headers"

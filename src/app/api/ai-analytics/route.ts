@@ -6,21 +6,21 @@ const apiKey = process.env.GEMINI_API_KEY || ""
 const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`
 
 interface WordCloudTerm {
-  word: string 
+  word: string
   weight: number
-  sentiment: "positive" | "negative" 
+  sentiment: "positive" | "negative"
 }
 
 interface SentimentBreakdown {
-  positive: number 
+  positive: number
   neutral: number
-  negative: number 
+  negative: number
 }
 
 interface AIAnalyticsResponse {
   sentiment: SentimentBreakdown
   keywords: WordCloudTerm[]
-  summary: string 
+  summary: string
 }
 
 async function fetchWithBackoff(url: string, options: RequestInit, retries = 5) {
@@ -31,8 +31,8 @@ async function fetchWithBackoff(url: string, options: RequestInit, retries = 5) 
 
       throw new Error(`API returned status ${response.status}`)
     } catch (error) {
-      if (i === retries - 1) throw error 
-      const delay = Math.pow(2, i) * 1000 + Math.random() * 1000 
+      if (i === retries - 1) throw error
+      const delay = Math.pow(2, i) * 1000 + Math.random() * 1000
       await new Promise(resolve => setTimeout(resolve, delay))
     }
   }
@@ -43,7 +43,7 @@ export async function GET() {
   if (process.env.NODE_ENV === "development") {
     effectiveUserId = process.env.DEV_FAKE_USER_ID || "clerk1"
   } else {
-    const authObj = auth() as unknown as { userId: string | null }
+    const authObj = await auth() as unknown as { userId: string | null }
     effectiveUserId = authObj.userId || null
   }
 
@@ -67,26 +67,26 @@ export async function GET() {
       include: { book: { select: { genre: true } } },
       orderBy: { updatedAt: "desc" },
     })
-    
+
     const genreCounts = topGenres.reduce((acc, ub) => {
-        const genre = ub.book.genre || "Unknown";
-        acc[genre] = (acc[genre] || 0) + 1;
-        return acc;
+      const genre = ub.book.genre || "Unknown";
+      acc[genre] = (acc[genre] || 0) + 1;
+      return acc;
     }, {} as Record<string, number>);
     const sortedGenres = Object.entries(genreCounts)
-        .sort(([, countA], [, countB]) => countB - countA)
-        .slice(0, 3)
-        .map(([genre]) => genre);
+      .sort(([, countA], [, countB]) => countB - countA)
+      .slice(0, 3)
+      .map(([genre]) => genre);
 
 
     const reviewTexts = reviews.map((r) => r.content).join(" | ")
 
     if (reviewTexts.length < 10) {
-        return NextResponse.json({
-            sentiment: { positive: 0, neutral: 100, negative: 0 },
-            keywords: [{ word: "No reviews yet", weight: 5, sentiment: "neutral" }],
-            summary: "Write a few reviews to unlock your AI Reading Personality Report! We need more data to analyze your style."
-        }, { status: 200 });
+      return NextResponse.json({
+        sentiment: { positive: 0, neutral: 100, negative: 0 },
+        keywords: [{ word: "No reviews yet", weight: 5, sentiment: "neutral" }],
+        summary: "Write a few reviews to unlock your AI Reading Personality Report! We need more data to analyze your style."
+      }, { status: 200 });
     }
 
     const systemPrompt = `You are a world-class Literary Analyst. Your task is to analyze the provided set of user reviews (separated by '|' characters) and their reading data.
@@ -126,8 +126,8 @@ export async function GET() {
               },
             },
             summary: {
-                type: "STRING",
-                description: "The Reading Personality Report: a single, engaging paragraph summarizing the user's reading style based on their reviews and top genres."
+              type: "STRING",
+              description: "The Reading Personality Report: a single, engaging paragraph summarizing the user's reading style based on their reviews and top genres."
             }
           },
         },
@@ -139,7 +139,7 @@ export async function GET() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
     })) as Response
-    
+
     const result = await response.json()
     const candidate = result.candidates?.[0]
 

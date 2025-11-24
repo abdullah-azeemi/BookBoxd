@@ -191,14 +191,7 @@ export default function AIAnalyticsPage() {
                 <p className="text-gray-600">Analyzing your literary soul...</p>
             </div>
         );
-        if (loading) {
-            return (
-                <div className="flex flex-col items-center justify-center min-h-screen">
-                    <Loader2 className="animate-spin h-10 w-10 text-[#19a1e6] mb-4" />
-                    <p className="text-gray-600">Analyzing your literary soul...</p>
-                </div>
-            );
-        }
+
 
         if (!isSignedIn) {
             return (

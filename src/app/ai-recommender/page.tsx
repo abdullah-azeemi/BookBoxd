@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useAuth } from "@clerk/nextjs";
 import Image from "next/image";
+import { Sparkles, Loader2 } from "lucide-react";
 
 interface Book {
   title: string;
@@ -71,9 +72,30 @@ export default function AIRecommenderPage() {
             <button
               onClick={handleAIRecommend}
               disabled={loading || !isLoaded}
-              className="mt-4 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-50"
+              className={`
+                mt-6 w-full sm:w-auto px-8 py-3 rounded-full 
+                font-semibold text-white tracking-wide shadow-md
+                transition-all duration-300 ease-in-out
+                flex items-center justify-center gap-2
+                ${loading || !isLoaded
+                  ? "bg-slate-400 cursor-not-allowed opacity-70"
+                  : "bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 hover:scale-105 hover:shadow-lg hover:shadow-blue-500/30"
+                }
+              `}
             >
-              {loading ? "Loading..." : !isSignedIn ? "Log in to Recommend" : "AI Recommend "}
+              {loading ? (
+                <>
+                  <Loader2 className="h-5 w-5 animate-spin" />
+                  <span>Analyzing...</span>
+                </>
+              ) : !isSignedIn ? (
+                <span>Log in to Recommend</span>
+              ) : (
+                <>
+                  <Sparkles className="h-5 w-5" />
+                  <span>Generate Recommendations</span>
+                </>
+              )}
             </button>
           </div>
 

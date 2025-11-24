@@ -13,9 +13,14 @@ export default function SearchBar() {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setQuery(e.target.value)
-    window.dispatchEvent(
-      new CustomEvent("bookSearch", { detail: e.target.value })
-    )
+  }
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      window.dispatchEvent(
+        new CustomEvent("bookSearch", { detail: query })
+      )
+    }
   }
 
   return (
@@ -26,6 +31,7 @@ export default function SearchBar() {
         placeholder="Search books..."
         value={query}
         onChange={handleChange}
+        onKeyDown={handleKeyDown}
       />
     </div>
   )
