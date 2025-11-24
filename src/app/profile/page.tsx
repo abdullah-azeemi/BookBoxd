@@ -35,7 +35,7 @@ export default async function ProfilePage() {
   const data: UserProfileData | null = await getProfile()
   const bookshelf = data?.bookshelf || { currentlyReading: [], wantToRead: [], read: [] }
   const stats = data?.stats || { totalBooksRead: 0, favoriteGenre: "Unknown", averageRating: 3, currentYearGoal: 60, currentYearProgress: 0, genreBreakdown: [] }
-  const user = data?.user || { username: "Anonymous", avatarUrl: "/placeholder-user.png", joiningDate: new Date().toISOString(), tagLine: "" }
+  const user = data?.user || { username: "Anonymous", avatarUrl: "/placeholder-user.jpg", joiningDate: new Date().toISOString(), tagLine: "" }
 
   return (
     <div className="min-h-screen bg-background">

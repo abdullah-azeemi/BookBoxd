@@ -28,16 +28,20 @@ export default function BookStatusButton({
   coverUrl,
 }: BookStatusButtonProps) {
   const [status, setStatus] = useState<BookStatus | null | "loading">("loading");
-  const { isSignedIn } = useAuth();
+  const { isSignedIn, isLoaded } = useAuth();
 
   useEffect(() => {
     const fetchStatus = async () => {
       try {
-        if (!isSignedIn) {
+        if (!isLoaded || !isSignedIn) {
           setStatus(null);
           return;
         }
         const res = await fetch(`/api/user-books/${externalBookId}`, { credentials: "include" });
+        if (res.status === 401) {
+          setStatus(null);
+          return;
+        }
         if (res.ok) {
           const data = await res.json();
           setStatus(data.status || null);
@@ -50,11 +54,11 @@ export default function BookStatusButton({
       }
     };
     fetchStatus();
-  }, [externalBookId, isSignedIn]);
+  }, [externalBookId, isSignedIn, isLoaded]);
 
   const handleStatusChange = async (newStatus: BookStatus) => {
     const originalStatus = status;
-    setStatus("loading"); 
+    setStatus("loading");
     try {
       if (!isSignedIn) {
         throw new Error("Not signed in");
@@ -80,7 +84,7 @@ export default function BookStatusButton({
       setStatus(data.userBook.status as BookStatus);
     } catch (error) {
       console.error(error);
-      setStatus(originalStatus); 
+      setStatus(originalStatus);
     }
   };
 

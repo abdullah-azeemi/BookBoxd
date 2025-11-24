@@ -21,20 +21,20 @@ interface ReviewsAndRatingsProps {
 
 export default function ReviewsAndRatings({ bookId, bookTitle, bookAuthor }: ReviewsAndRatingsProps) {
   const [reviews, setReviews] = useState<Review[]>([])
-  
 
 
-  
+
+
 
   useEffect(() => {
     // Fetch reviews
-  fetch(`/api/reviews?bookId=${bookId}`)
-    .then(res => res.json())
-    .then(data => setReviews(data.reviews || []));
+    fetch(`/api/reviews?bookId=${bookId}`)
+      .then(res => res.json())
+      .then(data => setReviews(data.reviews || []));
 
-}, [bookId]);
+  }, [bookId]);
 
-  
+
 
   // Placeholder array to maintain 2-3 empty boxes if no reviews
   const displayReviews = reviews.length ? reviews : Array(3).fill(null)
@@ -50,13 +50,13 @@ export default function ReviewsAndRatings({ bookId, bookTitle, bookAuthor }: Rev
             className="p-6 rounded-lg bg-white dark:bg-slate-800 shadow-md flex items-start gap-4"
           >
             <Avatar className="w-12 h-12">
-              <AvatarImage src={review ? "/placeholder-user.png" : ""} alt={review?.user.username || "Anonymous"} />
+              <AvatarImage src={review ? "/placeholder-user.jpg" : ""} alt={review?.user.username || "Anonymous"} />
               <AvatarFallback>
                 {review ? (review.user.username || "A")[0] : "?"}
               </AvatarFallback>
             </Avatar>
 
-            
+
 
             <div className="flex-1">
               {review ? (
@@ -100,7 +100,7 @@ export default function ReviewsAndRatings({ bookId, bookTitle, bookAuthor }: Rev
         </Link>
       </div>
 
-      
+
 
       {/* Post Review */}
       {/* <div className="mt-8">

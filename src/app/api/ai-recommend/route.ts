@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { auth } from "@clerk/nextjs/server";
 
 async function getGeminiRecommendations(query: string, geminiApiKey: string): Promise<string[] | null> {
   const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${geminiApiKey}`;
@@ -43,7 +44,7 @@ async function getGeminiRecommendations(query: string, geminiApiKey: string): Pr
       console.error("No JSON text found in Gemini response:", JSON.stringify(result));
       return null;
     }
-    
+
     const parsedJson = JSON.parse(jsonText);
     return parsedJson.recommendations as string[];
 
@@ -63,7 +64,7 @@ async function getGoogleBookDetails(title: string): Promise<{ author: string; co
 
     return {
       author: info?.authors?.[0] || "Unknown",
-      cover: info?.imageLinks?.thumbnail || undefined, 
+      cover: info?.imageLinks?.thumbnail || undefined,
       description: info?.description || undefined,
     };
   } catch (error) {
@@ -82,16 +83,16 @@ async function generateGhibliCover(title: string, description: string | undefine
       method: "POST",
       headers: {
         Authorization: `Bearer ${stabilityApiKey}`,
-        Accept: "image/*", 
+        Accept: "image/*",
       },
       body: JSON.stringify({
         prompt: prompt,
         model: "sd3", // Using Stable Diffusion 3
         output_format: "png",
-     
+
         width: 512,
-        height: 768, 
-       
+        height: 768,
+
       }),
     });
 
@@ -115,6 +116,11 @@ async function generateGhibliCover(title: string, description: string | undefine
 
 export async function POST(req: Request) {
   try {
+    const { userId } = await auth();
+    if (!userId) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const body = await req.json().catch(() => null);
     const query = body?.query;
     if (!query || typeof query !== "string" || !query.trim()) {
@@ -130,7 +136,7 @@ export async function POST(req: Request) {
     }
     if (!STABILITY_API_KEY) {
       console.warn("STABILITY_API_KEY not set. Will not generate custom covers if Google Books fails.");
-      
+
     }
 
     const recommendedTitles = await getGeminiRecommendations(query, GEMINI_API_KEY);
@@ -141,23 +147,23 @@ export async function POST(req: Request) {
     const booksWithDetails = await Promise.all(
       recommendedTitles.map(async (title) => {
         const bookDetails = await getGoogleBookDetails(title);
-        
+
         let coverToUse = bookDetails.cover;
 
         if (!coverToUse && STABILITY_API_KEY) {
-            console.log(`Generating Ghibli cover for "${title}"...`);
-            coverToUse = await generateGhibliCover(title, bookDetails.description, STABILITY_API_KEY);
-            if (coverToUse) {
-                console.log(`Successfully generated cover for "${title}".`);
-            } else {
-                console.warn(`Failed to generate cover for "${title}". Using placeholder.`);
-            }
+          console.log(`Generating Ghibli cover for "${title}"...`);
+          coverToUse = await generateGhibliCover(title, bookDetails.description, STABILITY_API_KEY);
+          if (coverToUse) {
+            console.log(`Successfully generated cover for "${title}".`);
+          } else {
+            console.warn(`Failed to generate cover for "${title}". Using placeholder.`);
+          }
         }
 
         return {
-          title: title, 
+          title: title,
           author: bookDetails.author,
-          cover: coverToUse || "/placeholder.svg", 
+          cover: coverToUse || "/placeholder.svg",
         };
       })
     );

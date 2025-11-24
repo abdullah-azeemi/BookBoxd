@@ -2,9 +2,10 @@
 
 import Link from "next/link";
 import { useState, useEffect } from "react";
+import { useAuth } from "@clerk/nextjs";
 import Image from "next/image";
 import { Card, CardContent } from "@/components/ui/card";
-import { Book } from "@prisma/client"; 
+import { Book } from "@prisma/client";
 interface UserBookWithBook {
   id: string;
   status: string;
@@ -26,19 +27,25 @@ export default function CollectionsPage() {
   };
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
   const [loading, setLoading] = useState(false);
-  
+
   const [readBooks, setReadBooks] = useState<UserBookWithBook[]>([]);
   const [currentlyReading, setCurrentlyReading] = useState<UserBookWithBook[]>([]);
   const [wantToRead, setWantToRead] = useState<UserBookWithBook[]>([]);
+
   const [libraryLoading, setLibraryLoading] = useState(true);
+  const { isSignedIn, isLoaded } = useAuth();
 
   useEffect(() => {
     const fetchLibrary = async () => {
+      if (!isLoaded || !isSignedIn) {
+        setLibraryLoading(false);
+        return;
+      }
       setLibraryLoading(true);
       try {
         const res = await fetch("/api/user-books");
         const data = await res.json();
-        
+
         if (data.userBooks) {
           setReadBooks(data.userBooks.filter((ub: UserBookWithBook) => ub.status === 'read'));
           setCurrentlyReading(data.userBooks.filter((ub: UserBookWithBook) => ub.status === 'reading'));
@@ -51,7 +58,7 @@ export default function CollectionsPage() {
       }
     };
     fetchLibrary();
-  }, []);
+  }, [isLoaded, isSignedIn]);
 
   const fetchBooks = async (query: string) => {
     if (!query) return;
@@ -78,13 +85,13 @@ export default function CollectionsPage() {
     window.addEventListener("bookSearch", handleSearch as EventListener);
     return () => window.removeEventListener("bookSearch", handleSearch as EventListener);
   }, []);
-  
+
   const renderBookList = (books: UserBookWithBook[]) => (
     <div className="flex space-x-6 overflow-x-auto pb-4 scrollbar-hide">
       {books.slice(0, 8).map((userBook) => (
         <Link
           key={userBook.id}
-          href={`/book/${userBook.book.externalId}`} 
+          href={`/book/${userBook.book.externalId}`}
           className="flex-shrink-0 w-40 space-y-2 cursor-pointer hover:scale-105 transition-transform"
         >
           <div>
@@ -112,6 +119,8 @@ export default function CollectionsPage() {
 
         {libraryLoading ? (
           <p>Loading your library...</p>
+        ) : !isSignedIn ? (
+          <p className="text-slate-500">Please log in to view your library.</p>
         ) : (
           <>
             <section className="mb-12">
