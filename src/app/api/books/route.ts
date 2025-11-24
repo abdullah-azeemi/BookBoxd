@@ -31,7 +31,7 @@ export async function GET(req: Request) {
         description: volume.description || "",
         publishedDate: volume.publishedDate || "",
         categories: volume.categories || [],
-        coverUrl: (volume.imageLinks?.thumbnail || null)?.replace("http://", "https://") || null,
+        coverUrl: (volume.imageLinks?.thumbnail || null)?.replace(/^http:\/\//i, "https://") || null,
       };
 
       return NextResponse.json({ book });
@@ -82,7 +82,7 @@ export async function GET(req: Request) {
         description: volume.description || "",
         publishedDate: volume.publishedDate || "",
         categories: volume.categories || [],
-        coverUrl: (volume.imageLinks?.thumbnail || null)?.replace("http://", "https://") || null,
+        coverUrl: (volume.imageLinks?.thumbnail || null)?.replace(/^http:\/\//i, "https://") || null,
       };
     });
 

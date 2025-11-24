@@ -3,7 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { auth } from "@clerk/nextjs/server";
 
 export async function GET() {
-  const authObj = auth() as unknown as { userId: string | null }
+  const authObj = await auth() as unknown as { userId: string | null }
   const effectiveUserId = process.env.NODE_ENV === "development"
     ? (authObj.userId ?? process.env.DEV_FAKE_USER_ID)
     : (authObj.userId || null)
@@ -17,7 +17,7 @@ export async function GET() {
         userId: effectiveUserId!,
       },
       include: {
-        book: true, 
+        book: true,
       },
     });
     return NextResponse.json({ userBooks });
@@ -28,7 +28,7 @@ export async function GET() {
 }
 
 export async function POST(req: Request) {
-  const authObj = auth() as unknown as { userId: string | null }
+  const authObj = await auth() as unknown as { userId: string | null }
   const effectiveUserId = process.env.NODE_ENV === "development"
     ? (authObj.userId ?? process.env.DEV_FAKE_USER_ID)
     : (authObj.userId || null)
