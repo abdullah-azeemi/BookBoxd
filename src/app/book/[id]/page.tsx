@@ -13,15 +13,21 @@ interface Book {
   }
 }
 
+import { getBookById } from "@/lib/books"
+
 export default async function BookDetailsPage(props: { params: Promise<{ id: string }> }) {
   const { id } = await props.params
-  const res = await fetch(`https://www.googleapis.com/books/v1/volumes/${id}`)
-  const book: Book = await res.json()
 
-  const title = book?.volumeInfo?.title || "Unknown Title"
-  const author = book?.volumeInfo?.authors?.join(", ") || "Unknown Author"
-  const categories = book?.volumeInfo?.categories?.slice(0, 5)?.join(", ") || "Uncategorized"
-  const cover = book?.volumeInfo?.imageLinks?.thumbnail || "/placeholder.svg"
+  const book = await getBookById(id)
+
+  if (!book) {
+    return <div>Book not found</div>
+  }
+
+  const title = book.title || "Unknown Title"
+  const author = book.authors.join(", ") || "Unknown Author"
+  const categories = book.categories.slice(0, 5).join(", ") || "Uncategorized"
+  const cover = book.coverUrl || "/placeholder.svg"
 
   return (
     <div className="flex flex-col min-h-screen bg-slate-50 dark:bg-slate-900">
@@ -57,7 +63,7 @@ export default async function BookDetailsPage(props: { params: Promise<{ id: str
                 coverUrl={cover}
               />
             </div>
-            
+
             <ReviewsAndRatings bookId={id} bookTitle={title} bookAuthor={author} />
           </div>
         </div>
