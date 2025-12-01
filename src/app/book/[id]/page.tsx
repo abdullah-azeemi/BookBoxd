@@ -1,8 +1,14 @@
 import Link from "next/link"
 import ReviewsAndRatings from "./ReviewsAndRatings"
 import BookStatusButton from "@/components/ui/BookStatusButton";
+import BookCover3D from "@/components/ui/BookCover3D";
+import AIBookSummary from "@/components/AIBookSummary";
+import SmartReviewAnalysis from "@/components/SmartReviewAnalysis";
+import AIChatbot from "@/components/AIChatbot";
 
 import { getBookById } from "@/lib/books"
+import { getAIBookDetails } from "@/lib/ai-book-details";
+import { prisma } from "@/lib/prisma";
 
 export default async function BookDetailsPage(props: { params: Promise<{ id: string }> }) {
   const { id } = await props.params
@@ -18,6 +24,21 @@ export default async function BookDetailsPage(props: { params: Promise<{ id: str
   const categories = book.categories.slice(0, 5).join(", ") || "Uncategorized"
   const cover = book.coverUrl || "/placeholder.svg"
 
+  const dbBook = await prisma.book.findUnique({ where: { externalId: id } });
+  let reviews: string[] = [];
+
+  if (dbBook) {
+    const dbReviews = await prisma.review.findMany({
+      where: { bookId: dbBook.id },
+      select: { content: true },
+      take: 20
+    });
+    reviews = dbReviews.map(r => r.content);
+  }
+
+  // Fetch AI Details
+  const aiDetails = await getAIBookDetails(title, author, reviews);
+
   return (
     <div className="flex flex-col min-h-screen bg-slate-50 dark:bg-slate-900">
       <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-grow">
@@ -29,34 +50,58 @@ export default async function BookDetailsPage(props: { params: Promise<{ id: str
           <span className="text-slate-800 dark:text-slate-200">{title}</span>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-12">
-          <div className="lg:col-span-1">
-            <div className="sticky top-24">
-              <div
-                className="aspect-[2/3] w-full rounded-lg bg-cover bg-center shadow-lg"
-                style={{ backgroundImage: `url('${cover}')` }}
-              ></div>
-              <div className="mt-6 text-center">
-                <h1 className="text-3xl font-bold text-slate-900 dark:text-white">{title}</h1>
-                <p className="text-lg text-slate-600 dark:text-slate-400 mt-1">by {author}</p>
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
+          {/* Left Column: Cover & Basic Info - Sticky */}
+          <div className="lg:col-span-4 xl:col-span-3">
+            <div className="sticky top-24 space-y-6">
+
+              <div className="py-4">
+                <BookCover3D coverUrl={cover} title={title} />
+              </div>
+
+              <div className="text-center lg:text-left">
+                <h1 className="text-3xl font-bold text-slate-900 dark:text-white leading-tight">{title}</h1>
+                <p className="text-lg text-slate-600 dark:text-slate-400 mt-2 font-medium">by {author}</p>
                 <p className="text-sm text-slate-500 dark:text-slate-500 mt-1">{categories}</p>
+              </div>
+
+              <div className="flex justify-center lg:justify-start">
+                <BookStatusButton
+                  externalBookId={id}
+                  title={title}
+                  author={author}
+                  coverUrl={cover}
+                />
               </div>
             </div>
           </div>
-          <div className="lg:col-span-2">
-            <div className="mb-6">
-              <BookStatusButton
-                externalBookId={id}
-                title={title}
-                author={author}
-                coverUrl={cover}
-              />
-            </div>
 
-            <ReviewsAndRatings bookId={id} bookTitle={title} bookAuthor={author} />
+          {/* Right Column: AI Features & Reviews */}
+          <div className="lg:col-span-8 xl:col-span-9 space-y-8">
+
+            {/* AI Summary */}
+            {aiDetails && <AIBookSummary summary={aiDetails.summary} />}
+
+            {/* Smart Analysis */}
+            {aiDetails && (
+              <SmartReviewAnalysis
+                themes={aiDetails.themes}
+                sentiment={aiDetails.sentiment}
+              />
+            )}
+
+            {/* Reviews Section */}
+            <ReviewsAndRatings
+              bookId={id}
+              bookTitle={title}
+              bookAuthor={author}
+            />
           </div>
         </div>
       </main>
+
+      {/* Chatbot */}
+      <AIChatbot bookTitle={title} bookAuthor={author} />
     </div>
   )
 }

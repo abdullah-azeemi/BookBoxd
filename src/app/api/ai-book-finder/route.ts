@@ -204,7 +204,6 @@ async function getOpenLibraryBooks(query: string, limit: number) {
 
         const authors = Array.isArray(doc.author_name) ? doc.author_name.join(', ') : doc.author_name;
 
-        // Extract the work ID from the key (e.g., "/works/OL12345W" -> "OL12345W")
         const bookId = doc.key?.split('/').pop() || '';
 
         let description = '';

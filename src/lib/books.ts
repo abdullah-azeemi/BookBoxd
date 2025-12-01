@@ -68,6 +68,14 @@ export async function getBookById(id: string): Promise<BookData | null> {
         const data = await res.json();
         const volume = data.volumeInfo || {};
 
+        const images = volume.imageLinks || {};
+        let coverUrl = images.extraLarge || images.large || images.medium || images.thumbnail || images.smallThumbnail || null;
+
+        if (coverUrl) {
+            coverUrl = coverUrl.replace(/^http:\/\//i, "https://");
+            coverUrl = coverUrl.replace("&edge=curl", "").replace("&zoom=1", "");
+        }
+
         return {
             id: data.id,
             title: volume.title,
@@ -75,7 +83,7 @@ export async function getBookById(id: string): Promise<BookData | null> {
             description: volume.description || "",
             publishedDate: volume.publishedDate || "",
             categories: volume.categories || [],
-            coverUrl: (volume.imageLinks?.thumbnail || null)?.replace(/^http:\/\//i, "https://") || null,
+            coverUrl: coverUrl,
         };
     } catch (error) {
         console.error("Error fetching book:", error);
