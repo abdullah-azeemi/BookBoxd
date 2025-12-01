@@ -12,11 +12,11 @@ import { BookOpen } from "lucide-react"
 import "./globals.css"
 
 import {
-  ClerkProvider, 
-  SignInButton, 
+  ClerkProvider,
+  SignInButton,
   SignUpButton,
   SignedIn,
-  SignedOut, 
+  SignedOut,
   UserButton
 } from "@clerk/nextjs"
 
@@ -37,59 +37,59 @@ export default function RootLayout({
       <html lang="en">
         <body className={`font-sans ${GeistSans.variable}`}>
           <header className="sticky top-0 z-10 w-full bg-slate-50/80 dark:bg-slate-900/80 backdrop-blur-sm">
-        <div className="container mx-auto flex items-center justify-between px-4 py-3 sm:px-6 lg:px-8">
-          <Link href="/" className="flex items-center gap-2">
-            <BookOpen className="h-6 w-6 text-blue-500" />
-            <span className="text-2xl font-bold text-slate-900 dark:text-white">BookBoxd</span>
-          </Link>
-          <nav className="hidden items-center gap-8 md:flex">
-            <Link
-              href="/home"
-              className="text-sm font-medium text-slate-600 hover:text-blue-500 dark:text-slate-300 dark:hover:text-blue-500"
-            >
-              Home
-            </Link>
-            <Link
-              href="/collections"
-              className="text-sm font-medium text-slate-600 hover:text-blue-500 dark:text-slate-300 dark:hover:text-blue-500"
-            >
-              Collections
-            </Link>
-            <Link
-              href="/profile"
-              className="text-sm font-medium text-slate-600 hover:text-blue-500 dark:text-slate-300 dark:hover:text-blue-500"
-            >
-              My Books
-            </Link>
-            <Link
-              href="/ai-analytics"
-              className="text-sm font-medium text-slate-600 hover:text-blue-500 dark:text-slate-300 dark:hover:text-blue-500"
-            >
-              AI Analytics
-            </Link>
-            <Link
-              href="/ai-recommender"
-              className="text-sm font-medium text-slate-600 hover:text-blue-500 dark:text-slate-300 dark:hover:text-blue-500"
-            >
-              AI Recommender
-            </Link>
-          </nav>
-          <div className="flex items-center gap-4">
-            <SearchBar />
-            <SignedOut>
-              <div className="text-sm font-medium text-slate-600 hover:text-blue-500 dark:text-slate-300 dark:hover:text-blue-500">
-              <SignInButton mode="modal" />
+            <div className="container mx-auto flex items-center justify-between px-4 py-3 sm:px-6 lg:px-8">
+              <Link href="/" className="flex items-center gap-2">
+                <BookOpen className="h-6 w-6 text-blue-500" />
+                <span className="text-2xl font-bold text-slate-900 dark:text-white">BookBoxd</span>
+              </Link>
+              <nav className="hidden items-center gap-8 md:flex">
+                <Link
+                  href="/home"
+                  className="text-sm font-medium text-slate-600 hover:text-blue-500 dark:text-slate-300 dark:hover:text-blue-500"
+                >
+                  Home
+                </Link>
+                <Link
+                  href="/collections"
+                  className="text-sm font-medium text-slate-600 hover:text-blue-500 dark:text-slate-300 dark:hover:text-blue-500"
+                >
+                  Collections
+                </Link>
+                <Link
+                  href="/profile"
+                  className="text-sm font-medium text-slate-600 hover:text-blue-500 dark:text-slate-300 dark:hover:text-blue-500"
+                >
+                  My Books
+                </Link>
+                <Link
+                  href="/ai-analytics"
+                  className="text-sm font-medium text-slate-600 hover:text-blue-500 dark:text-slate-300 dark:hover:text-blue-500"
+                >
+                  AI Analytics
+                </Link>
+                <Link
+                  href="/ai-recommender"
+                  className="text-sm font-medium text-slate-600 hover:text-blue-500 dark:text-slate-300 dark:hover:text-blue-500"
+                >
+                  AI Book Finder
+                </Link>
+              </nav>
+              <div className="flex items-center gap-4">
+                <SearchBar />
+                <SignedOut>
+                  <div className="text-sm font-medium text-slate-600 hover:text-blue-500 dark:text-slate-300 dark:hover:text-blue-500">
+                    <SignInButton mode="modal" />
+                  </div>
+                  <div className="text-sm font-medium text-slate-600 hover:text-blue-500 dark:text-slate-300 dark:hover:text-blue-500">
+                    <SignUpButton mode="modal" />
+                  </div>
+                </SignedOut>
+                <SignedIn>
+                  <UserButton afterSwitchSessionUrl="/" />
+                </SignedIn>
               </div>
-              <div className="text-sm font-medium text-slate-600 hover:text-blue-500 dark:text-slate-300 dark:hover:text-blue-500">
-              <SignUpButton mode="modal" />
-              </div>
-            </SignedOut>
-            <SignedIn>
-              <UserButton afterSwitchSessionUrl="/"/>
-            </SignedIn>
-          </div>
-        </div>
-      </header>
+            </div>
+          </header>
           <Suspense fallback={null}>{children}</Suspense>
           <Analytics />
         </body>
