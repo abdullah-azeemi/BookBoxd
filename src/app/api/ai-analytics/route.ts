@@ -39,12 +39,11 @@ async function fetchWithBackoff(url: string, options: RequestInit, retries = 5) 
 }
 
 export async function GET() {
-  let effectiveUserId: string | null = null
-  if (process.env.NODE_ENV === "development") {
+  const authObj = await auth()
+  let effectiveUserId = authObj.userId
+
+  if (!effectiveUserId && process.env.NODE_ENV === "development") {
     effectiveUserId = process.env.DEV_FAKE_USER_ID || "clerk1"
-  } else {
-    const authObj = await auth() as unknown as { userId: string | null }
-    effectiveUserId = authObj.userId || null
   }
 
   if (!effectiveUserId) {
@@ -54,6 +53,7 @@ export async function GET() {
   try {
     const user = await prisma.user.findUnique({ where: { clerkId: effectiveUserId } })
     if (!user) {
+      console.error(`User not found for clerkId: ${effectiveUserId}`);
       return NextResponse.json({ error: "User not found" }, { status: 404 })
     }
 
@@ -61,6 +61,8 @@ export async function GET() {
       where: { userId: user.id },
       select: { content: true },
     })
+
+    console.log(`Found ${reviews.length} reviews for user ${user.id}`);
 
     const topGenres = await prisma.userBook.findMany({
       where: { userId: user.id, status: "read" },
@@ -145,15 +147,17 @@ export async function GET() {
 
     if (candidate && candidate.content?.parts?.[0]?.text) {
       const jsonText = candidate.content.parts[0].text
-      const parsedData: AIAnalyticsResponse = JSON.parse(jsonText)
+      const cleanJson = jsonText.replace(/```json/g, "").replace(/```/g, "").trim();
+      const parsedData: AIAnalyticsResponse = JSON.parse(cleanJson)
       return NextResponse.json(parsedData)
     }
 
+    console.error("AI Response structure invalid:", JSON.stringify(result, null, 2));
     throw new Error("Failed to get structured response from AI.")
   } catch (err) {
-    console.error("AI Analytics Error:", err)
+    console.error("AI Analytics Error Details:", err)
     return NextResponse.json(
-      { error: "Failed to generate AI insights." },
+      { error: "Failed to generate AI insights.", details: err instanceof Error ? err.message : String(err) },
       { status: 500 }
     )
   }
