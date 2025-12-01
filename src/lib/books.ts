@@ -1,5 +1,3 @@
-import { Book } from "@prisma/client";
-
 export interface BookData {
     id: string;
     title: string;

@@ -2,17 +2,6 @@ import Link from "next/link"
 import ReviewsAndRatings from "./ReviewsAndRatings"
 import BookStatusButton from "@/components/ui/BookStatusButton";
 
-interface Book {
-  id: string
-  volumeInfo: {
-    title: string
-    authors?: string[]
-    categories?: string[]
-    description?: string
-    imageLinks?: { thumbnail?: string }
-  }
-}
-
 import { getBookById } from "@/lib/books"
 
 export default async function BookDetailsPage(props: { params: Promise<{ id: string }> }) {

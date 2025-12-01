@@ -179,7 +179,7 @@ async function getOpenLibraryBooks(query: string, limit: number) {
             if (i < MAX_RETRIES - 1) {
                 await new Promise(resolve => setTimeout(resolve, Math.pow(2, i) * 1000));
             }
-        } catch (e) {
+        } catch {
             if (i < MAX_RETRIES - 1) {
                 await new Promise(resolve => setTimeout(resolve, Math.pow(2, i) * 1000));
             }
