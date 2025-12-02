@@ -35,7 +35,7 @@ export function QuoteCard({
             )}
 
             <p className="text-slate-700 dark:text-slate-300 italic leading-relaxed mb-3">
-                "{text}"
+                &quot;{text}&quot;
             </p>
 
             <div className="border-t border-slate-200 dark:border-slate-600 pt-2">

@@ -234,7 +234,7 @@ export default function ProfilePage() {
           {/* User's Top Genres */}
           <section className="mb-10">
             <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-6">
-              User's Top Genres
+              User&apos;s Top Genres
             </h2>
             {stats.genreBreakdown.length > 0 ? (
               <Card className="p-6 border border-slate-200 dark:border-slate-700">
@@ -284,7 +284,7 @@ export default function ProfilePage() {
               <Card className="p-8 text-center border-2 border-dashed border-slate-200 dark:border-slate-700">
                 <BookOpen className="h-12 w-12 mx-auto mb-4 text-slate-300 dark:text-slate-600" />
                 <p className="text-slate-500 dark:text-slate-400 mb-4">
-                  No quotes yet. Save your favorite passages from books you've read!
+                  No quotes yet. Save your favorite passages from books you&apos;ve read!
                 </p>
                 {bookshelf.read.length > 0 && (
                   <Button onClick={() => setShowAddQuote(true)} variant="outline">

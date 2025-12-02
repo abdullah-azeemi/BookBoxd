@@ -4,19 +4,23 @@ import { auth } from "@clerk/nextjs/server"
 
 export async function DELETE(
     req: Request,
-    { params }: { params: { id: string } }
+    context: unknown
 ) {
+    const { params } = context as { params: Promise<{ id: string }> }
+    const { id } = await params
     try {
         const authObj = auth() as unknown as { userId: string | null }
-        const effectiveUserId = process.env.NODE_ENV === "development"
-            ? (authObj.userId ?? process.env.DEV_FAKE_USER_ID ?? "clerk1")
-            : (authObj.userId || null)
+        let effectiveUserId = authObj.userId
+
+        if (!effectiveUserId && process.env.NODE_ENV === "development") {
+            effectiveUserId = process.env.DEV_FAKE_USER_ID || "clerk1"
+        }
 
         if (!effectiveUserId) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
         }
 
-        const quoteId = params.id
+        const quoteId = id
 
         const quote = await prisma.quote.findUnique({
             where: { id: quoteId },

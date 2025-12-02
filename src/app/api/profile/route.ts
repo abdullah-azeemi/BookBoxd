@@ -61,12 +61,11 @@ interface UserProfileData {
 
 export async function GET() {
   try {
-    let effectiveUserId: string | null = null
-    if (process.env.NODE_ENV === "development") {
+    const authObj = auth() as unknown as { userId: string | null }
+    let effectiveUserId = authObj.userId
+
+    if (!effectiveUserId && process.env.NODE_ENV === "development") {
       effectiveUserId = process.env.DEV_FAKE_USER_ID || "clerk1"
-    } else {
-      const authObj = auth() as unknown as { userId: string | null }
-      effectiveUserId = authObj.userId || null
     }
 
     if (!effectiveUserId) {
@@ -231,9 +230,11 @@ export async function GET() {
 export async function PATCH(req: Request) {
   try {
     const authObj = auth() as unknown as { userId: string | null }
-    const effectiveUserId = process.env.NODE_ENV === "development"
-      ? (authObj.userId ?? process.env.DEV_FAKE_USER_ID ?? "clerk1")
-      : (authObj.userId || null)
+    let effectiveUserId = authObj.userId
+
+    if (!effectiveUserId && process.env.NODE_ENV === "development") {
+      effectiveUserId = process.env.DEV_FAKE_USER_ID || "clerk1"
+    }
 
     if (!effectiveUserId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
@@ -242,7 +243,7 @@ export async function PATCH(req: Request) {
     const body = await req.json()
     const { username, bio } = body
 
-    const updateData: any = {}
+    const updateData: Partial<{ username: string; bio: string }> = {}
     if (username !== undefined) updateData.username = username
     if (bio !== undefined) updateData.bio = bio
 
