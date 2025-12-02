@@ -229,16 +229,13 @@ export async function GET() {
 
 export async function PATCH(req: Request) {
   try {
-    const authObj = auth() as unknown as { userId: string | null }
-    let effectiveUserId = authObj.userId
+    const { userId } = await auth();
 
-    if (!effectiveUserId && process.env.NODE_ENV === "development") {
-      effectiveUserId = process.env.DEV_FAKE_USER_ID || "clerk1"
-    }
-
-    if (!effectiveUserId) {
+    if (!userId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
+
+    const effectiveUserId = userId;
 
     const body = await req.json()
     const { username, bio, avatarUrl } = body
@@ -290,8 +287,8 @@ export async function PATCH(req: Request) {
       bio: user.bio,
       avatarUrl: user.avatarUrl,
     })
-  } catch (error: any) {
-    if (error.code === "P2002") {
+  } catch (error: unknown) {
+    if (error && typeof error === 'object' && 'code' in error && error.code === "P2002") {
       return NextResponse.json({ error: "Username already taken" }, { status: 409 })
     }
 

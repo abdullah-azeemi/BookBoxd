@@ -3,18 +3,17 @@ import { put } from "@vercel/blob"
 import { auth } from "@clerk/nextjs/server"
 import { prisma } from "@/lib/prisma"
 
+export const runtime = "nodejs"
+
 export async function POST(req: Request) {
     try {
-        const authObj = auth() as unknown as { userId: string | null }
-        let effectiveUserId = authObj.userId
+        const { userId } = await auth()
 
-        if (!effectiveUserId && process.env.NODE_ENV === "development") {
-            effectiveUserId = process.env.DEV_FAKE_USER_ID || "clerk1"
-        }
-
-        if (!effectiveUserId) {
+        if (!userId) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
         }
+
+        const effectiveUserId = userId
 
         if (!process.env.BLOB_READ_WRITE_TOKEN) {
             console.error("Missing BLOB_READ_WRITE_TOKEN environment variable")
