@@ -4,6 +4,7 @@ import { auth, currentUser } from "@clerk/nextjs/server"
 
 interface Book {
   id: string
+  dbId: string
   title: string
   author: string
   coverUrl: string
@@ -20,12 +21,26 @@ interface ReviewItem {
   createdAt: string
 }
 
+interface QuoteItem {
+  id: string
+  text: string
+  bookTitle: string
+  author: string
+  createdAt: string
+}
+
+interface GenreBreakdown {
+  genre: string
+  count: number
+  percentage: number
+}
+
 interface UserProfileData {
   user: {
     username: string
     avatarUrl: string
     joiningDate: string
-    tagLine: string
+    bio: string
   }
   bookshelf: {
     currentlyReading: Book[]
@@ -38,9 +53,10 @@ interface UserProfileData {
     averageRating: number
     currentYearGoal: number
     currentYearProgress: number
-    genreBreakdown: Array<{ genre: string; count: number }>
+    genreBreakdown: GenreBreakdown[]
   }
   reviews: ReviewItem[]
+  quotes: QuoteItem[]
 }
 
 export async function GET() {
@@ -92,11 +108,19 @@ export async function GET() {
       "read": [] as Book[],
     }
     for (const ub of userBooks) {
+      // Ensure we have a valid externalId for navigation
+      const bookId = ub.book.externalId || ub.book.id
+      if (!bookId) {
+        console.warn(`Book ${ub.book.id} missing externalId, skipping`)
+        continue
+      }
+
       const genre = ub.book.genre || "Unknown"
       const b: Book = {
-        id: ub.book.externalId || ub.book.id,
-        title: ub.book.title,
-        author: ub.book.author,
+        id: bookId,
+        dbId: ub.book.id, // Internal DB ID for relations
+        title: ub.book.title || "Untitled",
+        author: ub.book.author || "Unknown Author",
         coverUrl: ub.book.coverUrl || "/placeholder.svg",
         genre,
         rating: ratingMap.get(ub.bookId),
@@ -120,14 +144,23 @@ export async function GET() {
     })
     const currentYearGoal = 60
 
+    // Calculate genre breakdown with percentages
     const genreCounts = new Map<string, number>()
+    const totalBooks = userBooks.length
+
     for (const ub of userBooks) {
       const g = ub.book.genre || "Unknown"
       genreCounts.set(g, (genreCounts.get(g) || 0) + 1)
     }
-    const genreBreakdown = Array.from(genreCounts.entries())
-      .map(([genre, count]) => ({ genre, count }))
+
+    const genreBreakdown: GenreBreakdown[] = Array.from(genreCounts.entries())
+      .map(([genre, count]) => ({
+        genre,
+        count,
+        percentage: totalBooks > 0 ? Math.round((count / totalBooks) * 100) : 0,
+      }))
       .sort((a, b) => b.count - a.count)
+      .slice(0, 5) // Top 5 genres
 
     const averageRatingAgg = await prisma.rating.aggregate({
       where: { userId: user.id },
@@ -150,12 +183,26 @@ export async function GET() {
       createdAt: r.createdAt.toISOString(),
     }))
 
+    // Fetch user's quotes
+    const quotesRaw = await prisma.quote.findMany({
+      where: { userId: user.id },
+      orderBy: { createdAt: "desc" },
+      take: 6, // Show top 6 quotes
+    })
+    const quotes: QuoteItem[] = quotesRaw.map((q) => ({
+      id: q.id,
+      text: q.text,
+      bookTitle: q.bookTitle,
+      author: q.author,
+      createdAt: q.createdAt.toISOString(),
+    }))
+
     const data: UserProfileData = {
       user: {
         username: user.username || "Anonymous",
-        avatarUrl: "/placeholder.svg",
+        avatarUrl: user.avatarUrl || "/placeholder.svg",
         joiningDate: user.createdAt.toISOString(),
-        tagLine: "Avid reader",
+        bio: user.bio || "Avid reader and book reviewer",
       },
       bookshelf: {
         currentlyReading: byStatus["reading"],
@@ -171,33 +218,46 @@ export async function GET() {
         genreBreakdown,
       },
       reviews,
+      quotes,
     }
 
     return NextResponse.json(data)
   } catch (error) {
-    if (process.env.NODE_ENV === "development") {
-      const empty: UserProfileData = {
-        user: {
-          username: "Anonymous",
-          avatarUrl: "/placeholder.svg",
-          joiningDate: new Date().toISOString(),
-          tagLine: "",
-        },
-        bookshelf: { currentlyReading: [], wantToRead: [], read: [] },
-        stats: {
-          totalBooksRead: 1,
-          favoriteGenre: "Unknown",
-          averageRating: 0,
-          currentYearGoal: 60,
-          currentYearProgress: 0,
-          genreBreakdown: [],
-        },
-        reviews: [],
-      }
-      console.error("Profile GET error (dev returning empty):", error)
-      return NextResponse.json(empty)
-    }
     console.error("Profile GET error:", error)
     return NextResponse.json({ error: "Failed to load profile" }, { status: 500 })
+  }
+}
+
+export async function PATCH(req: Request) {
+  try {
+    const authObj = auth() as unknown as { userId: string | null }
+    const effectiveUserId = process.env.NODE_ENV === "development"
+      ? (authObj.userId ?? process.env.DEV_FAKE_USER_ID ?? "clerk1")
+      : (authObj.userId || null)
+
+    if (!effectiveUserId) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    }
+
+    const body = await req.json()
+    const { username, bio } = body
+
+    const updateData: any = {}
+    if (username !== undefined) updateData.username = username
+    if (bio !== undefined) updateData.bio = bio
+
+    const user = await prisma.user.update({
+      where: { clerkId: effectiveUserId },
+      data: updateData,
+    })
+
+    return NextResponse.json({
+      username: user.username,
+      bio: user.bio,
+      avatarUrl: user.avatarUrl,
+    })
+  } catch (error) {
+    console.error("Profile PATCH error:", error)
+    return NextResponse.json({ error: "Failed to update profile" }, { status: 500 })
   }
 }

@@ -2,6 +2,7 @@ import type React from "react"
 import type { Metadata } from "next"
 import { GeistSans } from "geist/font/sans"
 
+
 import { Analytics } from "@vercel/analytics/next"
 import { Suspense } from "react"
 import SearchBar from "@/components/ui/SearchBar"
@@ -59,7 +60,7 @@ export default function RootLayout({
                   href="/profile"
                   className="text-sm font-medium text-slate-600 hover:text-blue-500 dark:text-slate-300 dark:hover:text-blue-500"
                 >
-                  My Books
+                  Profile
                 </Link>
                 <Link
                   href="/ai-analytics"

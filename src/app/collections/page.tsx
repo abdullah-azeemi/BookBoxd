@@ -6,6 +6,8 @@ import { useAuth } from "@clerk/nextjs";
 import Image from "next/image";
 import { Card, CardContent } from "@/components/ui/card";
 import { Book } from "@prisma/client";
+import { BookCard } from "@/components/ui/BookCard";
+
 interface UserBookWithBook {
   id: string;
   status: string;
@@ -87,27 +89,18 @@ export default function CollectionsPage() {
   }, []);
 
   const renderBookList = (books: UserBookWithBook[]) => (
-    <div className="flex space-x-6 overflow-x-auto pb-4 scrollbar-hide">
-      {books.slice(0, 8).map((userBook) => (
-        <Link
+    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+      {books.slice(0, 12).map((userBook) => (
+        <BookCard
           key={userBook.id}
-          href={`/book/${userBook.book.externalId}`}
-          className="flex-shrink-0 w-40 space-y-2 cursor-pointer hover:scale-105 transition-transform"
-        >
-          <div>
-            <Image
-              alt={userBook.book.title}
-              src={userBook.book.coverUrl || "/placeholder.svg"}
-              width={160}
-              height={240}
-              className="w-full aspect-[2/3] object-cover rounded-lg shadow-lg hover:shadow-xl transition-shadow"
-            />
-            <h3 className="font-semibold truncate text-sm mt-1">{userBook.book.title}</h3>
-            {userBook.book.author && (
-              <p className="text-xs text-slate-500">{userBook.book.author}</p>
-            )}
-          </div>
-        </Link>
+          id={userBook.book.externalId || userBook.book.id}
+          title={userBook.book.title}
+          author={userBook.book.author}
+          coverUrl={userBook.book.coverUrl || "/placeholder.svg"}
+          genre={userBook.book.genre || undefined}
+          showRating={false}
+          showGenre={false}
+        />
       ))}
     </div>
   );
