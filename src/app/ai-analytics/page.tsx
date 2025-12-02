@@ -116,7 +116,7 @@ export default function AIAnalyticsPage() {
         fetchData();
     }, [isLoaded, isSignedIn]);
 
-    console.log("Render State:", { loading, error, dataSummary: data?.summary, keywords: data?.keywords?.length });
+
 
     const WordCloud = useCallback(({ keywords }: { keywords: WordCloudTerm[] }) => {
         if (keywords.length === 0) {
