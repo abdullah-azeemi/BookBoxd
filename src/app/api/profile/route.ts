@@ -2,6 +2,8 @@ import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { auth, currentUser } from "@clerk/nextjs/server"
 
+export const runtime = "nodejs"
+
 interface Book {
   id: string
   dbId: string
@@ -61,16 +63,14 @@ interface UserProfileData {
 
 export async function GET() {
   try {
-    const authObj = auth() as unknown as { userId: string | null }
-    let effectiveUserId = authObj.userId
-
-    if (!effectiveUserId && process.env.NODE_ENV === "development") {
-      effectiveUserId = process.env.DEV_FAKE_USER_ID || "clerk1"
+    const { userId } = await auth();
+    console.log("[Profile API] Auth check:", { userId, nodeEnv: process.env.NODE_ENV });
+    if (!userId) {
+      console.error("[Profile API] No user ID – unauthorized");
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
+    const effectiveUserId = userId;
 
-    if (!effectiveUserId) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-    }
 
     let user = await prisma.user.upsert({
       where: { clerkId: effectiveUserId },
@@ -241,11 +241,44 @@ export async function PATCH(req: Request) {
     }
 
     const body = await req.json()
-    const { username, bio } = body
+    const { username, bio, avatarUrl } = body
 
-    const updateData: Partial<{ username: string; bio: string }> = {}
-    if (username !== undefined) updateData.username = username
+    const currentUser = await prisma.user.findUnique({
+      where: { clerkId: effectiveUserId },
+      select: { username: true }
+    })
+
+    console.log("[Profile PATCH] Debug:", {
+      incomingUsername: username,
+      currentUsername: currentUser?.username,
+      isEqual: username === currentUser?.username,
+      effectiveUserId
+    })
+
+    const updateData: Partial<{ username: string; bio: string; avatarUrl: string }> = {}
+
+    if (username !== undefined && username !== null) {
+      const isDifferent = username !== currentUser?.username;
+      const isCaseChangeOnly = username.toLowerCase() === currentUser?.username?.toLowerCase();
+
+      if (isDifferent && !isCaseChangeOnly) {
+        console.log("[Profile PATCH] Updating username to:", username)
+        updateData.username = username
+      } else if (isDifferent && isCaseChangeOnly) {
+        console.log("[Profile PATCH] Ignoring case-only username change:", username)
+      }
+    }
+
     if (bio !== undefined) updateData.bio = bio
+    if (avatarUrl !== undefined) updateData.avatarUrl = avatarUrl
+
+    if (Object.keys(updateData).length === 0) {
+      console.log("[Profile PATCH] No changes detected")
+      return NextResponse.json({
+        username: currentUser?.username,
+        message: "No changes detected"
+      })
+    }
 
     const user = await prisma.user.update({
       where: { clerkId: effectiveUserId },
@@ -257,7 +290,11 @@ export async function PATCH(req: Request) {
       bio: user.bio,
       avatarUrl: user.avatarUrl,
     })
-  } catch (error) {
+  } catch (error: any) {
+    if (error.code === "P2002") {
+      return NextResponse.json({ error: "Username already taken" }, { status: 409 })
+    }
+
     console.error("Profile PATCH error:", error)
     return NextResponse.json({ error: "Failed to update profile" }, { status: 500 })
   }
