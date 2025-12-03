@@ -1,3 +1,5 @@
+import { BookDetailsSkeleton } from "@/components/ui/Skeletons"
+
 export default function Loading() {
-  return <div>Loading...</div>
+  return <BookDetailsSkeleton />
 }
