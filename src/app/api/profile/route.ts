@@ -95,11 +95,11 @@ export async function GET() {
       orderBy: { updatedAt: "desc" },
     })
 
-    const bookIds = userBooks.map((ub) => ub.bookId)
+    const bookIds = userBooks.map((ub: { bookId: string }) => ub.bookId)
     const ratings = await prisma.rating.findMany({
       where: { userId: user.id, bookId: { in: bookIds } },
     })
-    const ratingMap = new Map(ratings.map((r) => [r.bookId, r.value]))
+    const ratingMap = new Map(ratings.map((r: { bookId: string; value: number }) => [r.bookId, r.value]))
 
     const byStatus = {
       "reading": [] as Book[],
@@ -122,7 +122,7 @@ export async function GET() {
         author: ub.book.author || "Unknown Author",
         coverUrl: ub.book.coverUrl || "/placeholder.svg",
         genre,
-        rating: ratingMap.get(ub.bookId),
+        rating: (ratingMap.get(ub.bookId) as number | undefined),
       }
       if (ub.status === "reading") byStatus["reading"].push(b)
       else if (ub.status === "want-to-read") byStatus["want-to-read"].push(b)
@@ -173,7 +173,7 @@ export async function GET() {
       orderBy: { createdAt: "desc" },
       take: 20,
     })
-    const reviews: ReviewItem[] = reviewsRaw.map((r) => ({
+    const reviews: ReviewItem[] = reviewsRaw.map((r: { id: string; book: { title: string; externalId: string | null; id: string }; content: string; rating: number; createdAt: Date }) => ({
       id: r.id,
       bookTitle: r.book.title,
       bookId: r.book.externalId || r.book.id,
@@ -188,7 +188,7 @@ export async function GET() {
       orderBy: { createdAt: "desc" },
       take: 6, // Show top 6 quotes
     })
-    const quotes: QuoteItem[] = quotesRaw.map((q) => ({
+    const quotes: QuoteItem[] = quotesRaw.map((q: { id: string; text: string; bookTitle: string; author: string; createdAt: Date }) => ({
       id: q.id,
       text: q.text,
       bookTitle: q.bookTitle,

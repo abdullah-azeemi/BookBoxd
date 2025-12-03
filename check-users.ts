@@ -15,7 +15,7 @@ async function main() {
     console.log("Total users:", users.length)
     console.table(users)
 
-    const usernames = users.map(u => u.username).filter(Boolean)
+    const usernames = users.map((u: { username: string | null }) => u.username).filter(Boolean) as string[]
     const duplicates = usernames.filter((item, index) => usernames.indexOf(item) !== index)
 
     if (duplicates.length > 0) {
@@ -25,7 +25,7 @@ async function main() {
     }
 
     // Check if "clerk1" exists
-    const devUser = users.find(u => u.clerkId === "clerk1")
+    const devUser = users.find((u: { clerkId: string }) => u.clerkId === "clerk1")
     if (devUser) {
         console.log("\n⚠️ Dev user 'clerk1' exists with username:", devUser.username)
     }

@@ -8,7 +8,9 @@ export async function GET(req: Request) {
     if (!bookId) return NextResponse.json({ average: 0, count: 0 })
 
     const ratings = await prisma.rating.findMany({ where: { bookId } })
-    const average = ratings.length ? ratings.reduce((sum, r) => sum + r.value, 0) / ratings.length : 0
+    const average = ratings.length
+      ? ratings.reduce((sum: number, r: { value: number }) => sum + r.value, 0) / ratings.length
+      : 0
 
     return NextResponse.json({ average, count: ratings.length })
   } catch {

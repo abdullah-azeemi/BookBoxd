@@ -5,7 +5,14 @@ import { useState, useEffect } from "react";
 import { useAuth } from "@clerk/nextjs";
 import Image from "next/image";
 import { Card, CardContent } from "@/components/ui/card";
-import { Book } from "@prisma/client";
+type Book = {
+  id: string;
+  externalId: string | null;
+  title: string;
+  author: string;
+  coverUrl: string | null;
+  genre: string | null;
+};
 import { BookCard } from "@/components/ui/BookCard";
 
 interface UserBookWithBook {

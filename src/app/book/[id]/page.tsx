@@ -33,7 +33,7 @@ export default async function BookDetailsPage(props: { params: Promise<{ id: str
       select: { content: true },
       take: 20
     });
-    reviews = dbReviews.map(r => r.content);
+    reviews = dbReviews.map((r: { content: string }) => r.content);
   }
 
   // Fetch AI Details

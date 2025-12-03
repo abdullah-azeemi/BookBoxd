@@ -59,8 +59,8 @@ export async function GET() {
         }
 
         const readBookExternalIds = userBooks
-            .map(ub => ub.book.externalId)
-            .filter((id): id is string => id !== null)
+            .map((ub: { book: { externalId: string | null } }) => ub.book.externalId)
+            .filter((id: string | null): id is string => id !== null)
 
         const allRecommendations: RecommendedBook[] = []
 

@@ -70,18 +70,18 @@ export async function GET() {
       orderBy: { updatedAt: "desc" },
     })
 
-    const genreCounts = topGenres.reduce((acc, ub) => {
+    const genreCounts = topGenres.reduce((acc: Record<string, number>, ub: { book: { genre: string | null } }) => {
       const genre = ub.book.genre || "Unknown";
       acc[genre] = (acc[genre] || 0) + 1;
       return acc;
     }, {} as Record<string, number>);
     const sortedGenres = Object.entries(genreCounts)
-      .sort(([, countA], [, countB]) => countB - countA)
+      .sort(([, countA], [, countB]) => (countB as number) - (countA as number))
       .slice(0, 3)
       .map(([genre]) => genre);
 
 
-    const reviewTexts = reviews.map((r) => r.content).join(" | ")
+    const reviewTexts = reviews.map((r: { content: string }) => r.content).join(" | ")
 
     if (reviewTexts.length < 10) {
       return NextResponse.json({
